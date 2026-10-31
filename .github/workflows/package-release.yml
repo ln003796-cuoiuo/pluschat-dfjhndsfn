@@ -1,0 +1,28 @@
+name: Package PlusChat
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    runs-on: windows-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Build deployment archive
+        shell: pwsh
+        run: ./package-release.ps1
+
+      - name: Upload deployment archive
+        uses: actions/upload-artifact@v4
+        with:
+          name: pluschat-${{ github.ref_name }}
+          path: release/pluschat-release-*.zip
+          if-no-files-found: error

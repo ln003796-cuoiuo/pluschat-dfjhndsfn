@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f7f8fc">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="PlusChat">
+  <title>PlusChat — общайтесь по-своему</title>
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" href="./icons/icon-192.png" type="image/png">
+  <link rel="apple-touch-icon" href="./icons/icon-192.png">
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <main class="page-shell">
+    <section class="login-card" aria-labelledby="page-title">
+      <a class="brand" href="./" aria-label="PlusChat"><span class="brand-mark" aria-hidden="true">+</span><span>plus<span class="brand-accent">chat</span></span></a>
+      <section id="login-view">
+        <div class="intro"><p class="eyebrow">Рады вас видеть</p><h1 id="page-title">Войти в аккаунт</h1><p class="subtitle">Продолжите общение там, где остановились.</p></div>
+        <form id="login-form" novalidate>
+          <label for="login-email">Электронная почта</label><input id="login-email" name="email" type="text" inputmode="email" autocomplete="username" spellcheck="false" placeholder="name@example.com" required>
+          <div class="password-label"><label for="login-password">Пароль</label><button class="text-button" id="toggle-login-password" type="button" aria-pressed="false">Показать</button></div>
+          <input id="login-password" name="password" type="password" autocomplete="current-password" placeholder="Введите пароль" required>
+          <button class="text-button forgot-button" id="forgot-password" type="button">Забыли пароль?</button>
+          <p id="login-message" class="form-message" role="status" aria-live="polite"></p>
+          <button class="submit-button" id="login-submit" type="submit"><span>Войти</span><span aria-hidden="true">→</span></button>
+        </form>
+        <p class="switch-line">Впервые в PlusChat? <button class="text-button" id="show-register" type="button">Создать аккаунт</button></p>
+        <p class="footnote">На этом устройстве вход сохранится. Вы сможете выйти из аккаунта позже.</p>
+      </section>
+
+      <section id="register-view" hidden>
+        <div class="intro"><p class="eyebrow" id="register-eyebrow">Новый аккаунт · шаг 1 из 4</p><h1 id="register-title">Ваша почта</h1><p class="subtitle" id="register-subtitle">Отправим код, чтобы подтвердить адрес.</p></div>
+        <div class="step-track" aria-hidden="true"><span id="step-track-fill"></span></div>
+        <form id="email-step" class="register-step" novalidate>
+          <label for="register-email">Электронная почта</label><input id="register-email" type="text" inputmode="email" autocomplete="email" spellcheck="false" placeholder="name@example.com" required>
+          <p class="form-message" id="email-message" role="status" aria-live="polite"></p><button class="submit-button" type="submit"><span>Получить код</span><span aria-hidden="true">→</span></button>
+        </form>
+        <form id="code-step" class="register-step" hidden novalidate>
+          <label for="verification-code">Код из письма</label><input id="verification-code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="[0-9]{6}" placeholder="000000" required>
+          <p class="form-message" id="code-message" role="status" aria-live="polite"></p><button class="submit-button" type="submit"><span>Подтвердить почту</span><span aria-hidden="true">→</span></button>
+          <button id="resend-registration-code" class="text-button step-back" type="button" disabled>Повторно отправить код</button>
+          <button class="text-button step-back" data-back="email" type="button">Изменить почту или запросить код позже</button>
+        </form>
+        <form id="profile-step" class="register-step" hidden novalidate>
+          <div class="avatar-row"><label class="avatar-picker" for="avatar-file" title="Загрузить аватар"><img id="avatar-preview" alt="" hidden><span id="avatar-placeholder" aria-hidden="true">···</span><input id="avatar-file" type="file" accept="image/png,image/jpeg,image/webp" hidden></label><div><strong>Добавьте аватар</strong><small>Необязательно · до 4 МБ</small></div></div>
+          <label for="register-username">Имя пользователя</label><div class="username-field"><span>@</span><input id="register-username" autocomplete="username" minlength="3" maxlength="24" placeholder="your_name" required></div><p id="username-message" class="field-hint" aria-live="polite">Латинские буквы, цифры и подчёркивание</p>
+          <label for="display-name">Как к вам обращаться?</label><input id="display-name" maxlength="80" autocomplete="nickname" placeholder="Ваше имя" required>
+          <label for="register-bio">О себе <span class="optional">необязательно</span></label><textarea id="register-bio" maxlength="280" rows="2" placeholder="Пара слов о себе"></textarea>
+          <p class="form-message" id="profile-message" role="status" aria-live="polite"></p><button class="submit-button" type="submit"><span>Далее</span><span aria-hidden="true">→</span></button><button class="text-button step-back" id="skip-bio" type="button">Пропустить описание</button>
+        </form>
+        <form id="password-step" class="register-step" hidden novalidate>
+          <div class="password-label"><label for="new-password">Придумайте пароль</label><button class="text-button" id="toggle-new-password" type="button" aria-pressed="false">Показать</button></div><div class="password-input-wrap"><input id="new-password" type="password" autocomplete="new-password" minlength="8" maxlength="72" required><button class="text-button" id="generate-password" type="button">Создать пароль</button></div>
+          <ul class="password-rules" id="password-rules"><li data-rule="length">8–72 байта в UTF‑8</li><li data-rule="lower">Строчная латинская буква</li><li data-rule="upper">Заглавная латинская буква</li><li data-rule="digit">Цифра</li><li data-rule="symbol">Специальный символ</li></ul>
+          <label for="confirm-password">Повторите пароль</label><input id="confirm-password" type="password" autocomplete="new-password" required>
+          <p class="form-message" id="password-message" role="status" aria-live="polite"></p><button class="submit-button" id="register-submit" type="submit"><span>Создать аккаунт</span><span aria-hidden="true">→</span></button><button class="text-button step-back" data-back="profile" type="button">Назад к профилю</button>
+        </form>
+        <p class="switch-line" id="back-to-login">Уже есть аккаунт? <button class="text-button" id="show-login" type="button">Войти</button></p>
+      </section>
+      <section id="success-view" hidden><div class="success-icon" aria-hidden="true">✓</div><p class="eyebrow">Готово</p><h1>Аккаунт создан</h1><p class="subtitle" id="success-message">Вы уже вошли в PlusChat на этом устройстве.</p></section>
+    </section>
+    <section id="chat-view" class="messenger-shell" hidden aria-label="Мессенджер">
+      <header class="messenger-topbar"><a class="brand" href="./"><span class="brand-mark" aria-hidden="true">+</span><span>plus<span class="brand-accent">chat</span></span></a><p id="app-status" class="form-message app-status" role="status" aria-live="polite" hidden></p><div class="topbar-user"><span class="stored-device"><i aria-hidden="true"></i>Запомнено на устройстве</span><button id="account-label" class="text-button" type="button">Аккаунт</button><button id="logout-button" class="icon-button" type="button" title="Выйти" aria-label="Выйти">↗</button></div></header>
+      <div class="messenger-layout">
+        <aside class="chat-sidebar">
+          <div class="sidebar-heading"><div><p class="eyebrow">Ваши сообщения</p><h2>Чаты</h2></div><button id="new-chat" class="icon-button add-chat" type="button" title="Новый чат" aria-label="Новый чат">＋</button></div>
+          <div id="chat-list" class="chat-list"></div>
+          <div id="chat-list-empty" class="sidebar-empty">Здесь появятся ваши переписки.</div>
+          <div class="sidebar-actions"><button id="create-group" class="outline-button" type="button">Создать группу</button><button id="join-local" class="outline-button" type="button">Чат рядом</button></div>
+        </aside>
+        <section class="thread-panel">
+          <div id="thread-empty" class="thread-empty"><div class="empty-orb">✦</div><h2>Ваши люди — рядом</h2><p>Начните новый чат или выберите переписку.</p><button id="empty-new-chat" class="submit-button" type="button"><span>Начать чат</span><span aria-hidden="true">→</span></button></div>
+          <div id="active-thread" class="active-thread" hidden>
+            <header class="thread-header"><button id="thread-back" class="icon-button thread-back" type="button" aria-label="Назад к чатам">‹</button><div class="thread-avatar" id="thread-avatar">✦</div><div><h2 id="thread-title"></h2><p id="thread-subtitle"></p></div><button id="leave-chat" class="icon-button leave-chat" type="button" title="Скрыть чат" aria-label="Скрыть чат">×</button></header>
+            <div id="messages" class="messages" aria-live="polite"><p id="messages-empty" class="messages-empty" role="status">Пока нет сообщений — отправьте первое.</p></div>
+            <div class="composer-wrap"><div id="media-panel" class="media-panel" hidden>
+              <div class="media-head"><div class="media-tabs"><button id="gif-tab" class="media-tab active" type="button">GIF</button><button id="sticker-tab" class="media-tab" type="button">Стикеры</button></div><button id="close-media" class="icon-button" type="button" aria-label="Закрыть">×</button></div>
+              <div id="gif-panel"><input id="gif-search" class="media-search" placeholder="Найти GIF" aria-label="Поиск GIF"><div id="gif-results" class="gif-grid"></div><p class="giphy-credit">Powered by GIPHY</p></div>
+              <div id="sticker-panel" hidden><div class="pack-toolbar"><div id="pack-tabs" class="pack-tabs"></div><button id="create-pack" class="text-button" type="button">＋ Пак</button></div><div id="pack-actions" class="pack-actions"></div><p id="sticker-action-message" class="form-message" role="status"></p><div id="sticker-results" class="sticker-grid"></div><p id="sticker-empty" class="media-empty">Создайте стикерпак или установите публичный.</p></div>
+            </div>
+              <p id="message-status" class="form-message composer-status" role="status" aria-live="polite" hidden></p>
+              <form id="message-form" class="composer"><button id="open-stickers" class="icon-button composer-action" type="button" title="GIF и стикеры">☺</button><textarea id="message-input" rows="1" maxlength="5000" placeholder="Написать сообщение…" aria-label="Сообщение"></textarea><button class="send-button" type="submit" aria-label="Отправить">↑</button></form>
+            </div>
+          </div>
+        </section>
+      </div>
+    </section>
+    <dialog id="chat-dialog" class="app-dialog"><form id="chat-create-form" method="dialog"><button class="dialog-close" type="button" aria-label="Закрыть">×</button><p class="eyebrow" id="chat-dialog-eyebrow">Новая переписка</p><h2 id="chat-dialog-title">Кому написать?</h2><div id="direct-fields"><label for="chat-username">Имя пользователя</label><input id="chat-username" placeholder="@username" autocomplete="off"></div><div id="group-fields" hidden><label for="group-title">Название группы</label><input id="group-title" maxlength="100" placeholder="Например, Друзья"><label for="group-members">Участники через запятую</label><input id="group-members" placeholder="@anna, @ivan"></div><p id="chat-create-message" class="form-message" role="status"></p><button id="chat-create-submit" class="submit-button" type="submit"><span>Продолжить</span><span aria-hidden="true">→</span></button></form></dialog>
+    <dialog id="pack-dialog" class="app-dialog"><form id="pack-create-form" method="dialog"><button class="dialog-close" type="button" aria-label="Закрыть">×</button><p class="eyebrow">Стикеры</p><h2>Новый стикерпак</h2><label for="pack-title">Название</label><input id="pack-title" maxlength="80" placeholder="Мой набор" required><label for="pack-description">Описание</label><input id="pack-description" maxlength="255" placeholder="Необязательно"><label class="check-label"><input id="pack-public" type="checkbox"> Сделать пак публичным</label><p id="pack-create-message" class="form-message" role="status"></p><button class="submit-button" type="submit"><span>Создать пак</span><span aria-hidden="true">→</span></button></form></dialog>
+    <dialog id="profile-dialog" class="app-dialog"><form id="profile-form" method="dialog"><button class="dialog-close" type="button" aria-label="Закрыть">×</button><p class="eyebrow">Ваш профиль</p><h2>Настройки аккаунта</h2><button id="install-app" class="outline-button install-app-button" type="button">Установить PlusChat</button><div class="avatar-row settings-avatar-row"><label class="avatar-picker" for="settings-avatar-file" title="Изменить аватар"><img id="settings-avatar-preview" alt="" hidden><span id="settings-avatar-placeholder" aria-hidden="true">···</span><input id="settings-avatar-file" type="file" accept="image/png,image/jpeg,image/webp" hidden></label><div><strong>Фото профиля</strong><small>Нажмите на круг, чтобы заменить</small></div></div><label for="settings-display-name">Имя</label><input id="settings-display-name" maxlength="80" required><label for="settings-bio">Описание <span class="optional">необязательно</span></label><textarea id="settings-bio" maxlength="280" rows="2"></textarea><label for="settings-age">Возраст <span class="optional">необязательно</span></label><input id="settings-age" type="number" min="1" max="120" placeholder="Можно пропустить"><p id="age-group-label" class="field-hint">Возрастную группу можно не указывать.</p><p id="profile-settings-message" class="form-message" role="status"></p><button id="save-profile" class="submit-button" type="submit"><span>Сохранить</span><span aria-hidden="true">→</span></button><hr class="dialog-divider"><label for="location-city">Город рядом с вами</label><input id="location-city" maxlength="92" placeholder="Например, Калуга"><p class="privacy-note">Геолокация подтверждает только примерное место устройства, а не место проживания. Город вводите сами; точные координаты не сохраняются. Подтверждение зоны действует 24 часа, затем его нужно обновить. Местный чат подбирается по примерной зоне и возрастной группе.</p><button id="enable-location" class="outline-button" type="button">Разрешить геолокацию</button><button id="disable-location" class="text-button danger-button" type="button">Выключить геолокацию</button><p id="location-message" class="form-message" role="status"></p><hr class="dialog-divider"><p class="devices-title">Устройства с доступом</p><div id="device-list" class="device-list"></div></form></dialog>
+    <dialog id="reset-dialog" class="app-dialog"><form id="reset-form" method="dialog"><button class="dialog-close" type="button" aria-label="Закрыть">×</button><p class="eyebrow">Безопасность</p><h2>Восстановить пароль</h2><label for="reset-email">Электронная почта</label><input id="reset-email" type="text" inputmode="email" autocomplete="email" spellcheck="false" required><button id="reset-send-code" class="outline-button" type="button">Получить код</button><div id="reset-fields" hidden><label for="reset-code">Код из письма</label><input id="reset-code" inputmode="numeric" autocomplete="one-time-code" maxlength="6"><label for="reset-new-password">Новый пароль</label><input id="reset-new-password" type="password" autocomplete="new-password" maxlength="72"><p class="field-hint">8–72 байта в UTF‑8, строчная и заглавная латинские буквы, цифра и спецсимвол.</p><label for="reset-confirm-password">Повторите пароль</label><input id="reset-confirm-password" type="password" autocomplete="new-password" maxlength="72"></div><p id="reset-message" class="form-message" role="status"></p><button id="reset-submit" class="submit-button" type="submit" hidden><span>Сохранить пароль</span><span aria-hidden="true">→</span></button></form></dialog>
+    <div class="ambient ambient-one" aria-hidden="true"></div><div class="ambient ambient-two" aria-hidden="true"></div>
+  </main>
+  <script src="./app.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,5 @@
+.env
+.env.local
+config.local.php
+storage/
+release/
