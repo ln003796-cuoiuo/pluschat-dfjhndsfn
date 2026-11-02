@@ -1498,3 +1498,23 @@ $('#pack-create-form').addEventListener('submit', async (event) => {
 });
 
 restoreSession();
+
+
+// Theme preference: explicit light/dark choice is shared by login and messenger screens.
+(() => {
+  const root = document.documentElement;
+  const buttons = [document.getElementById('theme-toggle-auth'), document.getElementById('theme-toggle-app')].filter(Boolean);
+  const saved = (() => { try { return localStorage.getItem('pluschat-theme'); } catch { return null; } })();
+  const initial = saved === 'dark' || saved === 'light' ? saved : (window.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+  const apply = (theme) => {
+    root.dataset.theme = theme;
+    buttons.forEach((button) => {
+      button.textContent = theme === 'dark' ? '☀' : '☾';
+      button.setAttribute('aria-label', theme === 'dark' ? 'Включить светлую тему' : 'Включить тёмную тему');
+      button.title = theme === 'dark' ? 'Светлая тема' : 'Тёмная тема';
+    });
+    try { localStorage.setItem('pluschat-theme', theme); } catch {}
+  };
+  apply(initial);
+  buttons.forEach((button) => button.addEventListener('click', () => apply(root.dataset.theme === 'dark' ? 'light' : 'dark')));
+})();
