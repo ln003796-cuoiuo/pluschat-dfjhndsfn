@@ -240,3 +240,5 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 :root[data-theme="dark"] .ambient { opacity:.25; }
 :root[data-theme="dark"] .success-icon { color:#8de0b8; background:#173b32; }
 @media (max-width:520px) { .auth-brand-row { margin-bottom:2px; } .login-card { padding:28px 22px; } }
+
+.thread-call-actions{display:flex;align-items:center;gap:6px;margin-left:auto}.thread-call-actions .icon-button{color:var(--accent,#2684f7);font-size:18px}.thread-header{gap:10px}
