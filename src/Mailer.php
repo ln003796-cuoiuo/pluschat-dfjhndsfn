@@ -117,6 +117,20 @@ function pluschat_smtp_credentials(string $from): array
 
     if ($user === '') $user = trim((string) (getenv('SMTP_USER') ?: ''));
     if ($password === '') $password = (string) (getenv('SMTP_PASSWORD') ?: '');
+
+    // SMTP servers commonly expect internationalized mailbox domains in IDNA ASCII form.
+    if (preg_match('/^([^@]+)@([^@]+)$/u', $user, $parts) && preg_match('/[^\\x20-\\x7E]/', $parts[2])) {
+        if (!function_exists('idn_to_ascii')) {
+            error_log('PlusChat mail error: PHP Intl is required for an internationalized SMTP username.');
+            return ['', ''];
+        }
+        $asciiDomain = idn_to_ascii($parts[2]) ?: '';
+        if ($asciiDomain === '') {
+            error_log('PlusChat mail error: SMTP username domain is invalid.');
+            return ['', ''];
+        }
+        $user = $parts[1] . '@' . $asciiDomain;
+    }
     return [$user, $password];
 }
 
