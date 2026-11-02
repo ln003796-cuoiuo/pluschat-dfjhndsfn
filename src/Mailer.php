@@ -74,9 +74,11 @@ function pluschat_mail_from(string $variable = 'MAIL_FROM'): ?string
 
 function send_pluschat_html(string $recipient, string $subject, string $html, string $from, string $fromName): bool
 {
-    if (getenv('SMTP_HOST')) {
+    $smtpHost = trim((string) (getenv('SMTP_HOST') ?: ''));
+    if ($smtpHost !== '') {
         return send_pluschat_smtp($recipient, $subject, $html, $from, $fromName);
     }
+
     $encodedSubject = function_exists('mb_encode_mimeheader')
         ? mb_encode_mimeheader($subject, 'UTF-8', 'B')
         : '=?UTF-8?B?' . base64_encode($subject) . '?=';
@@ -93,43 +95,137 @@ function send_pluschat_html(string $recipient, string $subject, string $html, st
     return mail($recipient, $encodedSubject, $html, implode("\r\n", $headers));
 }
 
+/**
+ * SMTP sender accounts may differ for registration and password recovery.
+ * Legacy SMTP_USER/SMTP_PASSWORD remain supported as a fallback.
+ */
+function pluschat_smtp_credentials(string $from): array
+{
+    $registrationFrom = pluschat_mail_from('MAIL_FROM');
+    $loginFrom = pluschat_mail_from('MAIL_LOGIN_FROM');
+
+    if ($loginFrom !== null && strcasecmp($from, $loginFrom) === 0) {
+        $user = trim((string) (getenv('SMTP_LOGIN_USER') ?: ''));
+        $password = (string) (getenv('SMTP_LOGIN_PASSWORD') ?: '');
+    } elseif ($registrationFrom !== null && strcasecmp($from, $registrationFrom) === 0) {
+        $user = trim((string) (getenv('SMTP_REGISTER_USER') ?: ''));
+        $password = (string) (getenv('SMTP_REGISTER_PASSWORD') ?: '');
+    } else {
+        $user = '';
+        $password = '';
+    }
+
+    if ($user === '') $user = trim((string) (getenv('SMTP_USER') ?: ''));
+    if ($password === '') $password = (string) (getenv('SMTP_PASSWORD') ?: '');
+    return [$user, $password];
+}
+
+function pluschat_smtp_ascii_host(string $host): ?string
+{
+    $host = trim($host);
+    if ($host === '' || preg_match('/[\r\n\/\\\\@]/', $host)) return null;
+
+    if (preg_match('/[^\x20-\x7E]/', $host)) {
+        if (!function_exists('idn_to_ascii')) return null;
+        $flags = defined('IDNA_DEFAULT') ? IDNA_DEFAULT : 0;
+        $variant = defined('INTL_IDNA_VARIANT_UTS46') ? INTL_IDNA_VARIANT_UTS46 : 0;
+        $host = idn_to_ascii($host, $flags, $variant) ?: '';
+    }
+
+    $host = strtolower(rtrim($host, '.'));
+    if ($host === '' || strlen($host) > 253
+        || !preg_match('/^(?=.{1,253}$)[a-z0-9](?:[a-z0-9.-]*[a-z0-9])?$/', $host)
+        || str_contains($host, '..')) {
+        return null;
+    }
+    return $host;
+}
+
 function send_pluschat_smtp(string $recipient, string $subject, string $html, string $from, string $fromName): bool
 {
-    $host = trim((string) getenv('SMTP_HOST'));
-    $port = (int) (getenv('SMTP_PORT') ?: 587);
-    $encryption = strtolower(trim((string) (getenv('SMTP_ENCRYPTION') ?: 'tls')));
-    $username = (string) (getenv('SMTP_USER') ?: '');
-    $password = (string) (getenv('SMTP_PASSWORD') ?: '');
-    if ($host === '' || preg_match('/[\r\n]/', $host) || $port < 1 || $port > 65535 || !in_array($encryption, ['tls', 'ssl', 'none'], true)
-        || ($username !== '' && $encryption === 'none')) {
-        error_log('PlusChat mail error: SMTP configuration is invalid.');
+    $configuredHost = trim((string) (getenv('SMTP_HOST') ?: ''));
+    $host = pluschat_smtp_ascii_host($configuredHost);
+    $port = (int) (getenv('SMTP_PORT') ?: 25);
+    $encryption = strtolower(trim((string) (getenv('SMTP_ENCRYPTION') ?: 'auto')));
+    [$username, $password] = pluschat_smtp_credentials($from);
+
+    if ($host === null || $port < 1 || $port > 65535
+        || !in_array($encryption, ['auto', 'starttls', 'tls', 'ssl', 'none'], true)
+        || (($username === '') !== ($password === ''))
+        || ($username !== '' && $encryption === 'none')
+        || !filter_var($recipient, FILTER_VALIDATE_EMAIL)
+        || !filter_var($from, FILTER_VALIDATE_EMAIL)) {
+        error_log('PlusChat mail error: SMTP configuration or email address is invalid.');
         return false;
     }
-    $target = ($encryption === 'ssl' ? 'ssl://' : 'tcp://') . $host . ':' . $port;
-    $socket = @stream_socket_client($target, $errno, $errstr, 10, STREAM_CLIENT_CONNECT);
-    if (!$socket) {
-        error_log('PlusChat mail error: SMTP connection failed (' . $errno . ').');
+
+    $context = stream_context_create([
+        'ssl' => [
+            'verify_peer' => true,
+            'verify_peer_name' => true,
+            'peer_name' => $host,
+            'SNI_enabled' => true,
+        ],
+    ]);
+    $transport = $encryption === 'ssl' ? 'ssl://' : 'tcp://';
+    $socket = @stream_socket_client(
+        $transport . $host . ':' . $port,
+        $errno,
+        $errorMessage,
+        12,
+        STREAM_CLIENT_CONNECT,
+        $context
+    );
+
+    if (!is_resource($socket)) {
+        error_log('PlusChat mail error: SMTP connection failed; errno=' . (int) $errno . '.');
         return false;
     }
-    stream_set_timeout($socket, 10);
+
+    stream_set_timeout($socket, 15);
+    $phase = 'greeting';
+
     try {
         smtp_expect($socket, [220]);
         $hello = preg_replace('/[^A-Za-z0-9.-]/', '', (string) ($_SERVER['SERVER_NAME'] ?? 'pluschat.local')) ?: 'pluschat.local';
-        smtp_command($socket, 'EHLO ' . $hello, [250]);
-        if ($encryption === 'tls') {
-            smtp_command($socket, 'STARTTLS', [220]);
-            if (!stream_socket_enable_crypto($socket, true, STREAM_CRYPTO_METHOD_TLS_CLIENT)) {
-                throw new RuntimeException('SMTP TLS negotiation failed.');
-            }
-            smtp_command($socket, 'EHLO ' . $hello, [250]);
+
+        $phase = 'EHLO';
+        $ehloResponse = smtp_command($socket, 'EHLO ' . $hello, [250]);
+        $supportsStartTls = (bool) preg_match('/(?:^|\r\n)250[ -]STARTTLS(?:\s|$)/i', $ehloResponse);
+
+        $useStartTls = $encryption === 'starttls'
+            || $encryption === 'tls'
+            || ($encryption === 'auto' && $supportsStartTls);
+
+        if (($encryption === 'starttls' || $encryption === 'tls') && !$supportsStartTls) {
+            throw new RuntimeException('SMTP server does not advertise STARTTLS (status 250).');
         }
+        if ($useStartTls) {
+            $phase = 'STARTTLS';
+            smtp_command($socket, 'STARTTLS', [220]);
+            $crypto = @stream_socket_enable_crypto($socket, true, STREAM_CRYPTO_METHOD_TLS_CLIENT);
+            if ($crypto !== true) {
+                throw new RuntimeException('TLS negotiation failed.');
+            }
+            $phase = 'EHLO after TLS';
+            $ehloResponse = smtp_command($socket, 'EHLO ' . $hello, [250]);
+        }
+
         if ($username !== '') {
+            if (!$useStartTls && $encryption !== 'ssl') {
+                throw new RuntimeException('SMTP authentication refused because the connection is not encrypted.');
+            }
+            $phase = 'AUTH LOGIN';
             smtp_command($socket, 'AUTH LOGIN', [334]);
             smtp_command($socket, base64_encode($username), [334]);
             smtp_command($socket, base64_encode($password), [235]);
         }
+
+        $phase = 'MAIL FROM';
         smtp_command($socket, 'MAIL FROM:<' . $from . '>', [250]);
+        $phase = 'RCPT TO';
         smtp_command($socket, 'RCPT TO:<' . $recipient . '>', [250, 251]);
+        $phase = 'DATA';
         smtp_command($socket, 'DATA', [354]);
 
         $encodedSubject = function_exists('mb_encode_mimeheader')
@@ -152,34 +248,57 @@ function send_pluschat_smtp(string $recipient, string $subject, string $html, st
         $body = chunk_split(base64_encode($html), 76, "\r\n");
         $message = implode("\r\n", $headers) . "\r\n\r\n" . $body;
         $message = preg_replace('/(^|\r\n)\./', '$1..', $message);
-        fwrite($socket, $message . ".\r\n");
+        $phase = 'message body';
+        smtp_write($socket, $message . ".\r\n");
         smtp_expect($socket, [250]);
-        fwrite($socket, "QUIT\r\n");
+
+        @fwrite($socket, "QUIT\r\n");
         fclose($socket);
         return true;
     } catch (Throwable $error) {
-        error_log('PlusChat mail error: SMTP delivery failed (' . $error->getMessage() . ').');
-        fclose($socket);
+        // Do not log server-provided text, addresses, usernames, or credentials.
+        error_log('PlusChat mail error: SMTP failed during ' . $phase . ': ' . $error->getMessage());
+        if (is_resource($socket)) fclose($socket);
         return false;
+    }
+}
+
+function smtp_write($socket, string $data): void
+{
+    $length = strlen($data);
+    $written = 0;
+    while ($written < $length) {
+        $result = @fwrite($socket, substr($data, $written));
+        if ($result === false || $result === 0) {
+            throw new RuntimeException('SMTP socket write failed.');
+        }
+        $written += $result;
     }
 }
 
 function smtp_command($socket, string $command, array $expected): string
 {
-    fwrite($socket, $command . "\r\n");
+    smtp_write($socket, $command . "\r\n");
     return smtp_expect($socket, $expected);
 }
 
 function smtp_expect($socket, array $expected): string
 {
     $response = '';
+    $line = '';
     do {
-        $line = fgets($socket, 2048);
-        if ($line === false) throw new RuntimeException('SMTP server closed the connection.');
+        $line = @fgets($socket, 2048);
+        if ($line === false) {
+            $meta = stream_get_meta_data($socket);
+            throw new RuntimeException(!empty($meta['timed_out']) ? 'SMTP response timed out.' : 'SMTP server closed the connection.');
+        }
         $response .= $line;
         $continue = isset($line[3]) && $line[3] === '-';
     } while ($continue);
+
     $code = (int) substr($line, 0, 3);
-    if (!in_array($code, $expected, true)) throw new RuntimeException('SMTP server returned status ' . $code . '.');
+    if (!in_array($code, $expected, true)) {
+        throw new RuntimeException('SMTP server returned status ' . $code . '.');
+    }
     return $response;
 }
