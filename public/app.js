@@ -621,6 +621,35 @@ async function loadChats() {
   }
 }
 
+async function startCall(type) {
+  if (!currentConversationId) return;
+  const popup = window.open('about:blank', '_blank');
+  const status = $('#message-status');
+  status.hidden = true;
+  try {
+    const { response, data } = await api('/calls/token.php', {
+      method: 'POST',
+      body: JSON.stringify({ conversation_id: currentConversationId, type }),
+    });
+    if (!response.ok || !data.call_url) {
+      popup?.close();
+      showMessage(status, data.error === 'calls_not_configured'
+        ? 'Сервер звонков ещё не настроен.'
+        : 'Не удалось создать звонок. Проверьте подключение и попробуйте ещё раз.');
+      status.hidden = false;
+      return;
+    }
+    if (popup) popup.location.replace(data.call_url);
+    else window.location.assign(data.call_url);
+  } catch {
+    popup?.close();
+    showMessage(status, 'Нет связи с сервером звонков.');
+    status.hidden = false;
+  }
+}
+$('#audio-call').addEventListener('click', () => startCall('audio'));
+$('#video-call').addEventListener('click', () => startCall('video'));
+
 async function openConversation(id, chat = {}) {
   messageRequestController?.abort();
   conversationViewToken += 1;
