@@ -1,4 +1,5 @@
-const API_BASE = '/api';
+// Resolve API beside this app.js file: works both at the domain root and under /public/.
+const API_BASE = new URL('./api', document.currentScript.src).pathname.replace(/\/$/, '');
 const $ = (selector) => document.querySelector(selector);
 
 if ('serviceWorker' in navigator) {
