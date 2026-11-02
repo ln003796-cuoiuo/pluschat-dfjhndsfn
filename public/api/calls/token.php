@@ -54,6 +54,13 @@ try {
     $token = $unsigned . '.' . rtrim(strtr(base64_encode($signature), '+/', '-_'), '=');
     $baseUrl = rtrim((string) env_value('CALLS_BASE_URL', 'https://xn--b1agc5a.xn--80avljg2a1c.xn--p1ai'), '/');
 
+    // Publish a normal chat notice without exposing the one-time join token.
+    $notice = $type === 'video'
+        ? '📹 Видеозвонок начат. Нажмите кнопку звонка в заголовке чата, чтобы присоединиться.'
+        : '📞 Аудиозвонок начат. Нажмите кнопку звонка в заголовке чата, чтобы присоединиться.';
+    $message = $pdo->prepare("INSERT INTO messages (conversation_id, sender_id, message_type, body) VALUES (:conversation_id, :sender_id, 'text', :body)");
+    $message->execute(['conversation_id' => $conversationId, 'sender_id' => $userId, 'body' => $notice]);
+
     json_response(200, [
         'ok' => true,
         'token' => $token,
