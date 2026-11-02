@@ -52,7 +52,7 @@ try {
     $unsigned = $encode($header) . '.' . $encode($claims);
     $signature = hash_hmac('sha256', $unsigned, $secret, true);
     $token = $unsigned . '.' . rtrim(strtr(base64_encode($signature), '+/', '-_'), '=');
-    $baseUrl = rtrim((string) env_value('CALLS_BASE_URL', 'https://xn--b1agc5a.xn--80aswg'), '/');
+    $baseUrl = rtrim((string) env_value('CALLS_BASE_URL', 'https://xn--b1agc5a.xn--80avljg2a1c.xn--p1ai'), '/');
 
     json_response(200, [
         'ok' => true,
