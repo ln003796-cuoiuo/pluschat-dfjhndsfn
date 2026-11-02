@@ -16,7 +16,7 @@ if ($retryAfter > 0) {
 $data = request_json();
 $conversationId = filter_var($data['conversation_id'] ?? null, FILTER_VALIDATE_INT);
 $type = (string) ($data['type'] ?? 'audio');
-if (!$conversationId || $conversationId < 1 || !in_array($type, ['audio', 'video', 'broadcast'], true)) {
+if (!$conversationId || $conversationId < 1 || !in_array($type, ['audio', 'video'], true)) {
     json_response(422, ['error' => 'invalid_call_request']);
 }
 
@@ -31,11 +31,7 @@ try {
     $query->execute(['user_id' => $userId, 'conversation_id' => $conversationId]);
     $conversation = $query->fetch();
     if (!$conversation) json_response(404, ['error' => 'conversation_not_found']);
-    if ($type === 'broadcast' && $conversation['kind'] !== 'group') {
-        json_response(422, ['error' => 'broadcast_requires_group']);
-    }
-
-    $now = time();
+        $now = time();
     $header = ['alg' => 'HS256', 'typ' => 'JWT'];
     $claims = [
         'iss' => 'pluschat',
