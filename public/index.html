@@ -16,7 +16,7 @@
 <body>
   <main class="page-shell">
     <section class="login-card" aria-labelledby="page-title">
-      <a class="brand" href="./" aria-label="PlusChat"><span class="brand-mark" aria-hidden="true">+</span><span>plus<span class="brand-accent">chat</span></span></a>
+      <div class="auth-brand-row"><a class="brand" href="./" aria-label="PlusChat"><span class="brand-mark" aria-hidden="true">+</span><span>plus<span class="brand-accent">chat</span></span></a><button class="theme-toggle" id="theme-toggle-auth" type="button" aria-label="Переключить тему" title="Переключить тему">☾</button></div>
       <section id="login-view">
         <div class="intro"><p class="eyebrow">Рады вас видеть</p><h1 id="page-title">Войти в аккаунт</h1><p class="subtitle">Продолжите общение там, где остановились.</p></div>
         <form id="login-form" novalidate>
@@ -62,7 +62,7 @@
       <section id="success-view" hidden><div class="success-icon" aria-hidden="true">✓</div><p class="eyebrow">Готово</p><h1>Аккаунт создан</h1><p class="subtitle" id="success-message">Вы уже вошли в PlusChat на этом устройстве.</p></section>
     </section>
     <section id="chat-view" class="messenger-shell" hidden aria-label="Мессенджер">
-      <header class="messenger-topbar"><a class="brand" href="./"><span class="brand-mark" aria-hidden="true">+</span><span>plus<span class="brand-accent">chat</span></span></a><p id="app-status" class="form-message app-status" role="status" aria-live="polite" hidden></p><div class="topbar-user"><span class="stored-device"><i aria-hidden="true"></i>Запомнено на устройстве</span><button id="account-label" class="text-button" type="button">Аккаунт</button><button id="logout-button" class="icon-button" type="button" title="Выйти" aria-label="Выйти">↗</button></div></header>
+      <header class="messenger-topbar"><a class="brand" href="./"><span class="brand-mark" aria-hidden="true">+</span><span>plus<span class="brand-accent">chat</span></span></a><p id="app-status" class="form-message app-status" role="status" aria-live="polite" hidden></p><div class="topbar-user"><span class="stored-device"><i aria-hidden="true"></i>Запомнено на устройстве</span><button class="theme-toggle topbar-theme-toggle" id="theme-toggle-app" type="button" aria-label="Переключить тему" title="Переключить тему">☾</button><button id="account-label" class="text-button" type="button">Аккаунт</button><button id="logout-button" class="icon-button" type="button" title="Выйти" aria-label="Выйти">↗</button></div></header>
       <div class="messenger-layout">
         <aside class="chat-sidebar">
           <div class="sidebar-heading"><div><p class="eyebrow">Ваши сообщения</p><h2>Чаты</h2></div><button id="new-chat" class="icon-button add-chat" type="button" title="Новый чат" aria-label="Новый чат">＋</button></div>
