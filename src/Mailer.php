@@ -74,7 +74,7 @@ function pluschat_mail_from(string $variable = 'MAIL_FROM'): ?string
 
 function send_pluschat_html(string $recipient, string $subject, string $html, string $from, string $fromName): bool
 {
-    $smtpHost = trim((string) (getenv('SMTP_HOST') ?: ''));
+    $smtpHost = trim((string) (getenv('SMTP_HOST') ?: 'mail.xn--80avljg2a1c.xn--p1ai'));
     if ($smtpHost !== '') {
         return send_pluschat_smtp($recipient, $subject, $html, $from, $fromName);
     }
@@ -157,7 +157,7 @@ function pluschat_smtp_ascii_host(string $host): ?string
 
 function send_pluschat_smtp(string $recipient, string $subject, string $html, string $from, string $fromName): bool
 {
-    $configuredHost = trim((string) (getenv('SMTP_HOST') ?: ''));
+    $configuredHost = trim((string) (getenv('SMTP_HOST') ?: 'mail.xn--80avljg2a1c.xn--p1ai'));
     $host = pluschat_smtp_ascii_host($configuredHost);
     $port = (int) (getenv('SMTP_PORT') ?: 25);
     $encryption = strtolower(trim((string) (getenv('SMTP_ENCRYPTION') ?: 'auto')));
