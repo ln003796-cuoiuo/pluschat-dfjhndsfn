@@ -48,7 +48,7 @@ try {
     $unsigned = $encode($header) . '.' . $encode($claims);
     $signature = hash_hmac('sha256', $unsigned, $secret, true);
     $token = $unsigned . '.' . rtrim(strtr(base64_encode($signature), '+/', '-_'), '=');
-    $baseUrl = rtrim((string) env_value('CALLS_BASE_URL', 'https://xn--b1agc5a.xn--80avljg2a1c.xn--p1ai'), '/');
+    $baseUrl = rtrim((string) env_value('CALLS_BASE_URL', 'https://xn--b1ajehof.xn--80avljg2a1c.xn--p1ai'), '/');
 
     // Publish a normal chat notice without exposing the one-time join token.
     $notice = $type === 'video'
