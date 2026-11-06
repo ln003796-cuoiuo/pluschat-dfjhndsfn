@@ -5,12 +5,29 @@ require_once __DIR__ . '/../../../src/bootstrap.php';
 require_post();
 start_app_session();
 $data = request_json();
-$email = normalize_email_address((string) ($data['email'] ?? ''));
+
+$identifier = trim((string) ($data['identifier'] ?? $data['email'] ?? ''));
 $password = (string) ($data['password'] ?? '');
 
-if ($email === null) {
-    json_response(422, ['error' => 'invalid_email']);
+$isEmail = str_contains($identifier, '@');
+if ($isEmail) {
+    $normalizedEmail = normalize_email_address($identifier);
+    if ($normalizedEmail === null) {
+        json_response(422, ['error' => 'invalid_identifier']);
+    }
+    $lookupValue = $normalizedEmail;
+    $lookupSql = 'email = :identifier';
+    $rateLimitIdentity = $normalizedEmail;
+} else {
+    $normalizedUsername = strtolower(ltrim($identifier, '@'));
+    if (!preg_match('/^[a-z0-9_]{3,24}$/', $normalizedUsername)) {
+        json_response(422, ['error' => 'invalid_identifier']);
+    }
+    $lookupValue = $normalizedUsername;
+    $lookupSql = 'username = :identifier';
+    $rateLimitIdentity = '@' . $normalizedUsername;
 }
+
 if ($password === '' || strlen($password) > 72) {
     json_response(422, ['error' => 'invalid_credentials']);
 }
@@ -18,14 +35,20 @@ if ($password === '' || strlen($password) > 72) {
 try {
     $ip = (string) ($_SERVER['REMOTE_ADDR'] ?? 'unknown');
     $ipWait = consume_rate_limit('login-ip', $ip, 30, 900);
-    $accountWait = consume_rate_limit('login-account', $ip . "\0" . $email, 10, 900);
+    $accountWait = consume_rate_limit('login-account', $ip . "\0" . $rateLimitIdentity, 10, 900);
     $retryAfter = max($ipWait, $accountWait);
     if ($retryAfter > 0) {
         header('Retry-After: ' . $retryAfter);
         json_response(429, ['error' => 'too_many_attempts', 'retryAfter' => $retryAfter]);
     }
-    $query = database()->prepare('SELECT id, email, username, password_hash, session_version, display_name, age_years FROM users WHERE email = :email AND email_verified_at IS NOT NULL LIMIT 1');
-    $query->execute(['email' => $email]);
+
+    $query = database()->prepare(
+        "SELECT id, email, username, password_hash, session_version, display_name, age_years
+         FROM users
+         WHERE {$lookupSql} AND email_verified_at IS NOT NULL
+         LIMIT 1"
+    );
+    $query->execute(['identifier' => $lookupValue]);
     $user = $query->fetch();
 } catch (Throwable $error) {
     error_log('PlusChat login database error: ' . $error->getMessage());
