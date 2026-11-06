@@ -1,27 +1,27 @@
 # PlusChat PHP API
 
-The API and static app are served from the same HTTPS origin so the HTTP-only session cookie works without cross-origin cookie settings. The document root must be `Server/public/`; keep `src/`, `database/`, `.env`, and `storage/` outside it.
+The API and static app are served from the same HTTPS origin so the HTTP-only session cookie works without cross-origin cookie settings. In this repository, the document root must point to the `public/` directory; keep `src/`, `database/`, `.env`, and `storage/` outside it.
 
 PlusChat is one responsive installable web app. Its service worker caches only the app shell and icon files; authenticated API responses and user media are never cached. The app needs a secure HTTPS origin (or localhost during local development) for installation and geolocation.
 
 Requires PHP 8.1+ with PDO MySQL, Fileinfo, OpenSSL, and Intl enabled. Intl is needed to normalize internationalized email domains such as `плюсчат.рф` for SMTP delivery and address comparison.
 
-For uploads, set PHP `upload_max_filesize` to at least `4M` and `post_max_size` to at least `5M`. The PHP process must be able to create and write to `Server/storage/`; keep that directory outside `public/`.
+For uploads, set PHP `upload_max_filesize` to at least `4M` and `post_max_size` to at least `5M`. The PHP process must be able to create and write to the repository-level `storage/` directory; keep that directory outside `public/`.
 
 ## Database setup
 
 1. Run `database/schema.sql` in the `pluschat` MySQL database.
    For an existing database created before sticker-history protection was added, also run `database/migrations/001_sticker_history_restrict.sql` once.
 2. Configure the web server environment variables from `.env.example` in the hosting control panel, or place a private `.env` in `Server/` (the loader uses hosting environment values first). Set the mail sender fields to the provided mailboxes. For SMTP, set `SMTP_HOST=mail.xn--80avljg2a1c.xn--p1ai`, `SMTP_PORT=25`, and `SMTP_ENCRYPTION=auto`. Set `SMTP_REGISTER_USER` / `SMTP_REGISTER_PASSWORD` for `register@плюсчат.рф` and `SMTP_LOGIN_USER` / `SMTP_LOGIN_PASSWORD` for `login@плюсчат.рф`. The client uses STARTTLS when the server advertises it and refuses to send SMTP AUTH credentials over an unencrypted connection. If the server does not offer STARTTLS, ask the mail provider for its supported secure SMTP port/settings rather than setting plaintext authentication. Generate a unique `APP_SECRET` for the host; keep `.env`, credentials, and API keys out of the public web root and repository.
-3. In a source checkout, run `App/deploy.ps1` from Windows to copy the static app into `public/`. The release archive already contains those public files; point the HTTPS web root at its `public/` directory.
+3. The static web app is already in `public/`; no separate build or copy step is required. Point the HTTPS document root at this directory.
 
-To make a clean upload archive from Windows, run `Server/package-release.ps1`. It creates `Server/release/pluschat-release-<timestamp>.zip` with the public app, PHP source, SQL schema, and setup notes. It does not include `.env`, local credentials, or runtime storage. Extract it outside the current web root, configure `.env` next to `public/`, import `database/schema.sql`, grant PHP write access to `storage/`, and set the site's document root to the extracted `public/` directory.
+To make a clean upload archive from Windows, run `./package-release.ps1` from the repository root. It creates `./release/pluschat-release-<timestamp>.zip` with the public app, PHP source, SQL schema, and setup notes. It does not include `.env`, local credentials, or runtime storage. Extract it outside the current web root, configure `.env` in the extracted repository root beside `public/`, import `database/schema.sql`, grant PHP write access to the root-level `storage/` directory, and set the site's document root to the extracted `public/` directory.
 
 The GitHub Actions workflow at `.github/workflows/package-release.yml` builds the same deployment archive when run manually or when a `v*` tag is pushed, then attaches it to the workflow run as an artifact. The workflow packages source for download; it does not deploy the website.
 
 If the hosting plan fixes the domain root at `public_html`, extract the archive in the account home directory, copy the **contents** of its `public/` folder into the domain's document root (including the hidden `.htaccess` file), and leave `src/`, `database/`, `.env`, and the generated `storage/` folder in the account home directory beside `public_html/`. Never put `.env` or `src/` inside the public web root.
 
-For a local preview, run `php -S 127.0.0.1:8080 -t public` from `Server/` after configuring the database and mail environment. HTTP localhost requires `SESSION_SECURE_COOKIE=false` in the shell environment; do not use that setting on the HTTPS production site. The secure-cookie setting defaults to `true`.
+For a local preview, run `php -S 127.0.0.1:8080 -t public` from the repository root after configuring the database and mail environment. HTTP localhost requires `SESSION_SECURE_COOKIE=false` in the shell environment; do not use that setting on the HTTPS production site. The secure-cookie setting defaults to `true`.
 
 ## Authentication endpoints
 
