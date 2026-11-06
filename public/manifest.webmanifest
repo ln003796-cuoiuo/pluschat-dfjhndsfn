@@ -1,8 +1,8 @@
 {
   "id": "./",
-  "name": "PlusChat",
-  "short_name": "PlusChat",
-  "description": "Личные и групповые переписки, GIF и стикеры.",
+  "name": "Плюс Чат",
+  "short_name": "Плюс Чат",
+  "description": "Мессенджер Плюс Чат: личные и групповые переписки, GIF и стикеры.",
   "lang": "ru",
   "start_url": "./",
   "scope": "./",
