@@ -200,13 +200,13 @@ $('#login-form').addEventListener('submit', async (event) => {
   try {
     const { response, data } = await api('/auth/login.php', {
       method: 'POST',
-      body: JSON.stringify({ email: $('#login-email').value.trim(), password: $('#login-password').value }),
+      body: JSON.stringify({ identifier: $('#login-email').value.trim(), password: $('#login-password').value }),
     });
     if (!response.ok) {
       const errorMessage = response.status === 429
         ? rateLimitMessage(data)
-        : data.error === 'invalid_email'
-          ? 'Введите корректный адрес электронной почты.'
+        : data.error === 'invalid_identifier'
+          ? 'Введите корректную почту или имя пользователя.'
           : response.status === 401 || response.status === 422
             ? 'Проверьте почту и пароль.'
             : 'Не удалось войти. Попробуйте позже.';
