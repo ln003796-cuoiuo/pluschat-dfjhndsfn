@@ -25,7 +25,7 @@ For a local preview, run `php -S 127.0.0.1:8080 -t public` from the repository r
 
 ## Authentication endpoints
 
-- `POST /api/auth/login.php` accepts JSON `{ "email": "...", "password": "..." }`.
+- `POST /api/auth/login.php` accepts JSON `{ "identifier": "email or @username", "password": "..." }`. The legacy `email` field is still accepted for older clients.
 - `POST /api/auth/request-code.php` accepts JSON `{ "email": "..." }`.
 - `POST /api/auth/verify-code.php` accepts JSON `{ "email": "...", "code": "123456" }`.
 - `POST /api/auth/register.php` accepts multipart fields `email`, `username`, `displayName`, `bio`, `password`, and optional `avatar`.
