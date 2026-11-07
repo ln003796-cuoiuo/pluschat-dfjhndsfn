@@ -1,10 +1,12 @@
-const CACHE_NAME = 'pluschat-shell-v5';
+const CACHE_NAME = 'pluschat-shell-v6';
 const SHELL_FILES = [
   './',
   './index.html',
   './styles.css',
   './redesign.css',
+  './platform.css',
   './app.js',
+  './platform.js',
   './manifest.webmanifest',
   './icons/icon-192.png',
   './icons/icon-512.png',
