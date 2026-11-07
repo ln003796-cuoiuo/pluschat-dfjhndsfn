@@ -1,0 +1,2 @@
+# Users
+Owns profile data, usernames, avatars, account lifecycle and device sessions. Existing authentication/session behavior in src/bootstrap.php and public/api/auth is a compatibility boundary; extract incrementally.

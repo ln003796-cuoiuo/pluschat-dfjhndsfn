@@ -1,0 +1,2 @@
+# Messages
+Owns direct/group conversations, membership, messages, edits, replies, reactions, attachments, drafts, delivery/read cursors and retention. Preserve existing public/api/chats URLs and JSON contracts for Android. Keep authorization server-side.

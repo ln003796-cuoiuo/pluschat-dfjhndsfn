@@ -1,0 +1,2 @@
+# Channels
+Owns channel identity, ownership, subscriptions metadata and channel-page read models. Public pages live in public/channel; HTTP adapters in public/api/channels. A channel post is canonical and may surface in feeds/videos without duplicating media. Implemented vertical slice: channel page by slug and recent posts.

@@ -1,0 +1,2 @@
+# Media
+Owns upload validation, media metadata, storage adapters, thumbnails and safe delivery. Store bytes once and reference them from chats, channels, videos and shorts. Validate MIME, size and ownership server-side.
