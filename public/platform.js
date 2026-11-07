@@ -286,7 +286,10 @@
             button.disabled = false;
           }
         });
-        item.append(details, button);
+        const openChannel = make('a', 'platform-channel-open', 'Открыть канал →');
+        openChannel.href = './channel/?slug=' + encodeURIComponent(channel.slug);
+        openChannel.setAttribute('aria-label', 'Открыть канал ' + channel.title);
+        item.append(details, openChannel, button);
         list.append(item);
       }
     } catch (error) {
