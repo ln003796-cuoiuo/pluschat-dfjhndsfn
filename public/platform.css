@@ -475,3 +475,62 @@
 @media (max-width: 520px) {
   .chat-search { min-height: 44px; margin-inline: 0; }
 }
+
+
+/* Richer chat-list metadata */
+.chat-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  text-align: left;
+}
+.chat-item-copy { flex: 1 1 auto; min-width: 0; gap: 5px; }
+.chat-item-copy strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  letter-spacing: -.15px;
+}
+.chat-item-copy span {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+  line-height: 1.4;
+}
+.chat-item-meta {
+  display: flex;
+  align-self: flex-start;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+}
+.chat-item-time {
+  color: var(--pc-muted);
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.chat-item.has-unread .chat-item-copy strong { color: var(--pc-text); font-weight: 800; }
+.chat-item.has-unread .chat-item-copy span { color: var(--pc-text-soft); font-weight: 650; }
+.chat-item.has-unread .chat-item-time { color: var(--pc-accent); font-weight: 750; }
+.chat-unread-badge {
+  display: inline-grid;
+  min-width: 20px;
+  height: 20px;
+  place-items: center;
+  padding-inline: 5px;
+  border-radius: 999px;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+@media (max-width: 520px) {
+  .chat-item { gap: 10px; padding: 10px 8px; }
+  .chat-item-meta { gap: 4px; }
+  .chat-item-time { font-size: 9px; }
+}
