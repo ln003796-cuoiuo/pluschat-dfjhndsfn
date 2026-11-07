@@ -621,34 +621,54 @@ async function loadChats() {
   }
 }
 
-async function startCall(type) {
-  if (!currentConversationId) return;
+async function startCall(conversationId = currentConversationId) {
+  const targetConversationId = Number(conversationId);
+  if (!Number.isSafeInteger(targetConversationId) || targetConversationId < 1) {
+    showAppStatus('Сначала выберите чат, из которого хотите позвонить.');
+    return;
+  }
+
+  // Open the tab synchronously from the click gesture so the browser does not block it.
   const popup = window.open('about:blank', '_blank');
-  const status = $('#message-status');
-  status.hidden = true;
+  if (!popup) {
+    showAppStatus('Браузер заблокировал окно звонка. Разрешите всплывающие окна для сайта и нажмите «Позвонить» ещё раз.');
+    return;
+  }
+
+  showAppStatus('Подключаем звонок…');
   try {
     const { response, data } = await api('/calls/token.php', {
       method: 'POST',
-      body: JSON.stringify({ conversation_id: currentConversationId, type }),
+      body: JSON.stringify({
+        conversation_id: targetConversationId,
+        // A single call always supports both microphone and camera.
+        // The participant can switch the camera off inside the call room.
+        type: 'video',
+      }),
     });
     if (!response.ok || !data.call_url) {
-      popup?.close();
-      showMessage(status, data.error === 'calls_not_configured'
+      popup.close();
+      showAppStatus(data.error === 'calls_not_configured'
         ? 'Сервер звонков ещё не настроен.'
-        : 'Не удалось создать звонок. Проверьте подключение и попробуйте ещё раз.');
-      status.hidden = false;
+        : data.error === 'conversation_not_found'
+          ? 'Вы не состоите в этом чате.'
+          : 'Не удалось создать звонок. Проверьте подключение и попробуйте ещё раз.');
       return;
     }
-    if (popup) popup.location.replace(data.call_url);
-    else window.location.assign(data.call_url);
+    const callUrl = new URL(data.call_url, window.location.href);
+    if (callUrl.protocol !== 'https:' && callUrl.hostname !== 'localhost') {
+      popup.close();
+      showAppStatus('Сервер вернул небезопасную ссылку звонка. Обратитесь к администратору.');
+      return;
+    }
+    popup.location.replace(callUrl.href);
+    showAppStatus('Звонок открыт в новой вкладке.', true);
   } catch {
-    popup?.close();
-    showMessage(status, 'Нет связи с сервером звонков.');
-    status.hidden = false;
+    popup.close();
+    showAppStatus('Нет связи с сервером звонков.');
   }
 }
-$('#audio-call').addEventListener('click', () => startCall('audio'));
-$('#video-call').addEventListener('click', () => startCall('video'));
+$('#call-button').addEventListener('click', () => startCall());
 
 async function openConversation(id, chat = {}) {
   messageRequestController?.abort();
@@ -954,9 +974,29 @@ function showCreateChat(kind) {
   $('#chat-create-message').textContent = '';
   $('#chat-dialog').showModal();
 }
-$('#new-chat').addEventListener('click', () => showCreateChat('direct'));
+const createMenu = $('#new-chat-menu');
+function toggleCreateMenu(force) {
+  const shouldOpen = typeof force === 'boolean' ? force : createMenu.hidden;
+  createMenu.hidden = !shouldOpen;
+  $('#new-chat').setAttribute('aria-expanded', String(shouldOpen));
+}
+$('#new-chat').addEventListener('click', () => toggleCreateMenu());
+$('#new-direct-chat').addEventListener('click', () => {
+  toggleCreateMenu(false);
+  showCreateChat('direct');
+});
+$('#new-group-chat').addEventListener('click', () => {
+  toggleCreateMenu(false);
+  showCreateChat('group');
+});
 $('#empty-new-chat').addEventListener('click', () => showCreateChat('direct'));
 $('#create-group').addEventListener('click', () => showCreateChat('group'));
+document.addEventListener('click', (event) => {
+  if (!event.target.closest('.new-chat-control')) toggleCreateMenu(false);
+});
+document.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape') toggleCreateMenu(false);
+});
 $('#chat-dialog').querySelector('.dialog-close').addEventListener('click', () => $('#chat-dialog').close());
 $('#chat-create-form').addEventListener('submit', async (event) => {
   event.preventDefault();
