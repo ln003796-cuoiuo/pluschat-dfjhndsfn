@@ -40,6 +40,7 @@ try {
         'conversation_id' => (int) $conversationId,
         'type' => $type,
         'media_mode' => 'audio_video',
+        'media_mode' => 'audio_video',
         'role' => (string) $conversation['role'],
         'jti' => sprintf('%s-%s', bin2hex(random_bytes(8)), bin2hex(random_bytes(8))),
         'iat' => $now,
