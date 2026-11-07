@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 require_once __DIR__ . '/../../../src/bootstrap.php';
+require_once __DIR__ . '/../../../modules/bootstrap.php';
 
 $userId = authenticated_user_id();
 $method = strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET'));
@@ -81,29 +82,13 @@ try {
     if ($method === 'GET') {
         $afterId = max(0, (int) ($_GET['after_id'] ?? 0));
         $beforeId = max(0, (int) ($_GET['before_id'] ?? 0));
-        if ($beforeId > 0) {
-            $query = $pdo->prepare('SELECT m.id, m.sender_id, u.username, u.display_name, u.avatar_path AS sender_avatar_path, m.message_type, m.body, m.sticker_id, m.media_url, s.alt_text AS sticker_alt_text, m.created_at FROM messages m JOIN users u ON u.id = m.sender_id LEFT JOIN stickers s ON s.id = m.sticker_id WHERE m.conversation_id = :conversation_id AND m.id < :before_id ORDER BY m.id DESC LIMIT 100');
-            $query->execute(['conversation_id' => $conversationId, 'before_id' => $beforeId]);
-            $messages = array_reverse($query->fetchAll());
-        } elseif ($afterId > 0) {
-            $query = $pdo->prepare('SELECT m.id, m.sender_id, u.username, u.display_name, u.avatar_path AS sender_avatar_path, m.message_type, m.body, m.sticker_id, m.media_url, s.alt_text AS sticker_alt_text, m.created_at FROM messages m JOIN users u ON u.id = m.sender_id LEFT JOIN stickers s ON s.id = m.sticker_id WHERE m.conversation_id = :conversation_id AND m.id > :after_id ORDER BY m.id ASC LIMIT 100');
-            $query->execute(['conversation_id' => $conversationId, 'after_id' => $afterId]);
-            $messages = $query->fetchAll();
-        } else {
-            $query = $pdo->prepare('SELECT m.id, m.sender_id, u.username, u.display_name, u.avatar_path AS sender_avatar_path, m.message_type, m.body, m.sticker_id, m.media_url, s.alt_text AS sticker_alt_text, m.created_at FROM messages m JOIN users u ON u.id = m.sender_id LEFT JOIN stickers s ON s.id = m.sticker_id WHERE m.conversation_id = :conversation_id ORDER BY m.id DESC LIMIT 100');
-            $query->execute(['conversation_id' => $conversationId]);
-            $messages = array_reverse($query->fetchAll());
-        }
+        $repository = new \\PlusChat\\Modules\\Messages\\MessageRecords\\MessageRepository($pdo);
+        $messages = $repository->history($conversationId, $afterId, $beforeId, 100);
         if ($messages) {
             $latestMessageId = (int) $messages[count($messages) - 1]['id'];
             $markRead = $pdo->prepare('UPDATE conversation_members SET last_read_message_id = GREATEST(COALESCE(last_read_message_id, 0), :message_id) WHERE conversation_id = :conversation_id AND user_id = :user_id');
             $markRead->execute(['message_id' => $latestMessageId, 'conversation_id' => $conversationId, 'user_id' => $userId]);
         }
-        foreach ($messages as &$message) {
-            if ($message['sender_avatar_path']) $message['avatar_url'] = '/api/users/avatar.php?id=' . (int) $message['sender_id'];
-            unset($message['sender_avatar_path']);
-        }
-        unset($message);
         $pdo->commit();
         json_response(200, ['messages' => $messages]);
     }
@@ -123,15 +108,15 @@ try {
         $body = trim((string) ($data['body'] ?? ''));
         if ($body === '' || utf8_length($body) > 5000) json_response(422, ['error' => 'invalid_message']);
         $enforceSendLimit();
-        $insert = $pdo->prepare("INSERT INTO messages (conversation_id, sender_id, message_type, body) VALUES (:conversation_id, :sender_id, 'text', :body)");
-        $insert->execute(['conversation_id' => $conversationId, 'sender_id' => $userId, 'body' => $body]);
+        $repository = new \\PlusChat\\Modules\\Messages\\MessageRecords\\MessageRepository($pdo);
+        $createdMessageId = $repository->createText($conversationId, $userId, $body);
     } elseif ($type === 'gif') {
         $url = trim((string) ($data['url'] ?? ''));
         $host = parse_url($url, PHP_URL_HOST);
         if (strlen($url) > 1024 || parse_url($url, PHP_URL_SCHEME) !== 'https' || !$host || !preg_match('/(^|\.)giphy\.com$/i', $host)) json_response(422, ['error' => 'invalid_gif']);
         $enforceSendLimit();
-        $insert = $pdo->prepare("INSERT INTO messages (conversation_id, sender_id, message_type, media_url) VALUES (:conversation_id, :sender_id, 'gif', :url)");
-        $insert->execute(['conversation_id' => $conversationId, 'sender_id' => $userId, 'url' => $url]);
+        $repository = new \\PlusChat\\Modules\\Messages\\MessageRecords\\MessageRepository($pdo);
+        $createdMessageId = $repository->createGif($conversationId, $userId, $url);
     } elseif ($type === 'sticker') {
         $stickerId = (int) ($data['stickerId'] ?? 0);
         $stickerTransactionStarted = false;
@@ -146,14 +131,14 @@ try {
             json_response(404, ['error' => 'sticker_not_found']);
         }
         $enforceSendLimit();
-        $insert = $pdo->prepare("INSERT INTO messages (conversation_id, sender_id, message_type, sticker_id) VALUES (:conversation_id, :sender_id, 'sticker', :sticker_id)");
-        $insert->execute(['conversation_id' => $conversationId, 'sender_id' => $userId, 'sticker_id' => $stickerId]);
+        $repository = new \\PlusChat\\Modules\\Messages\\MessageRecords\\MessageRepository($pdo);
+        $createdMessageId = $repository->createSticker($conversationId, $userId, $stickerId);
         if ($stickerTransactionStarted) $pdo->commit();
     } else {
         json_response(422, ['error' => 'invalid_message_type']);
     }
     if ($pdo->inTransaction()) $pdo->commit();
-    json_response(201, ['id' => (int) $pdo->lastInsertId()]);
+    json_response(201, ['id' => $createdMessageId ?? (int) $pdo->lastInsertId()]);
 } catch (Throwable $error) {
     if (isset($pdo) && $pdo->inTransaction()) $pdo->rollBack();
     error_log('PlusChat messages error: ' . $error->getMessage());
