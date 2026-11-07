@@ -36,6 +36,45 @@
   }
   topbar.insertAdjacentElement('afterend', nav);
 
+  // Fast client-side chat search: filters the already loaded conversation list.
+  const sidebar = root.querySelector('.chat-sidebar');
+  const sidebarHeading = sidebar?.querySelector('.sidebar-heading');
+  const chatList = sidebar?.querySelector('#chat-list');
+  if (sidebar && sidebarHeading && chatList) {
+    const searchWrap = document.createElement('label');
+    searchWrap.className = 'chat-search';
+    searchWrap.setAttribute('aria-label', 'Поиск по чатам');
+    searchWrap.innerHTML = '<span aria-hidden="true">⌕</span><input id="chat-search-input" type="search" placeholder="Поиск по чатам" autocomplete="off"><button type="button" aria-label="Очистить поиск" hidden>×</button>';
+    sidebarHeading.insertAdjacentElement('afterend', searchWrap);
+    const searchInput = searchWrap.querySelector('input');
+    const clearSearch = searchWrap.querySelector('button');
+    const applyChatFilter = () => {
+      const query = searchInput.value.trim().toLocaleLowerCase('ru');
+      let visible = 0;
+      for (const item of chatList.querySelectorAll('.chat-item')) {
+        const matches = !query || item.textContent.toLocaleLowerCase('ru').includes(query);
+        item.hidden = !matches;
+        if (matches) visible += 1;
+      }
+      clearSearch.hidden = !query;
+      let empty = sidebar.querySelector('.chat-search-empty');
+      if (!empty) {
+        empty = document.createElement('p');
+        empty.className = 'chat-search-empty';
+        empty.textContent = 'Ничего не найдено. Попробуйте другое имя.';
+        chatList.insertAdjacentElement('afterend', empty);
+      }
+      empty.hidden = !query || visible > 0;
+    };
+    searchInput.addEventListener('input', applyChatFilter);
+    clearSearch.addEventListener('click', () => {
+      searchInput.value = '';
+      applyChatFilter();
+      searchInput.focus();
+    });
+    new MutationObserver(applyChatFilter).observe(chatList, {childList: true, subtree: true});
+  }
+
   const callsPanel = document.createElement('section');
   callsPanel.className = 'platform-page';
   callsPanel.id = 'platform-calls';
