@@ -57,9 +57,9 @@
   --pc-text-soft: #68748a;
   --pc-muted: #7e8799;
   --pc-line: #e8ecf3;
-  --pc-accent: #4f65f6;
-  --pc-accent-strong: #3f55e8;
-  --pc-accent-soft: #edf0ff;
+  --pc-accent: #2388e8;
+  --pc-accent-strong: #1474d0;
+  --pc-accent-soft: #e8f3ff;
 }
 :root[data-theme="dark"] {
   --pc-bg: #101722;
@@ -70,9 +70,9 @@
   --pc-text-soft: #a8b4c8;
   --pc-muted: #8d9bb0;
   --pc-line: #2a394e;
-  --pc-accent: #8291ff;
-  --pc-accent-strong: #a1adff;
-  --pc-accent-soft: #293451;
+  --pc-accent: #4ba5f5;
+  --pc-accent-strong: #82c0fa;
+  --pc-accent-soft: #1a354d;
 }
 .messenger-shell { border-radius: 28px; }
 .messenger-topbar { border-color: var(--pc-line); }
@@ -268,7 +268,7 @@
   padding: 0 clamp(16px, 2.4vw, 34px);
   border-bottom: 1px solid var(--pc-line, #e8ecf3);
   background:
-    radial-gradient(ellipse at 8% -55%, color-mix(in srgb, var(--pc-accent, #4f65f6) 13%, transparent), transparent 48%),
+    radial-gradient(ellipse at 8% -55%, color-mix(in srgb, var(--pc-accent, #2388e8) 13%, transparent), transparent 48%),
     var(--pc-surface, #fff);
 }
 .messenger-topbar::after {
@@ -278,7 +278,7 @@
   bottom: -1px;
   left: 0;
   height: 1px;
-  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--pc-accent, #4f65f6) 24%, transparent), transparent);
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--pc-accent, #2388e8) 24%, transparent), transparent);
   content: "";
 }
 .messenger-topbar > .brand {
@@ -340,9 +340,9 @@
   transition: background .18s ease, border-color .18s ease, color .18s ease;
 }
 .topbar-user #account-label:hover {
-  border-color: color-mix(in srgb, var(--pc-accent, #4f65f6) 42%, var(--pc-line, #e8ecf3));
-  color: var(--pc-accent, #4f65f6);
-  background: var(--pc-accent-soft, #edf0ff);
+  border-color: color-mix(in srgb, var(--pc-accent, #2388e8) 42%, var(--pc-line, #e8ecf3));
+  color: var(--pc-accent, #2388e8);
+  background: var(--pc-accent-soft, #e8f3ff);
   text-decoration: none;
 }
 .topbar-user #logout-button {
@@ -366,8 +366,8 @@
   font-weight: 700;
 }
 .platform-tab.active {
-  border-color: color-mix(in srgb, var(--pc-accent, #4f65f6) 13%, transparent);
-  background: linear-gradient(135deg, var(--pc-accent-soft, #edf0ff), color-mix(in srgb, var(--pc-accent-soft, #edf0ff) 35%, var(--pc-surface, #fff)));
+  border-color: color-mix(in srgb, var(--pc-accent, #2388e8) 13%, transparent);
+  background: linear-gradient(135deg, var(--pc-accent-soft, #e8f3ff), color-mix(in srgb, var(--pc-accent-soft, #e8f3ff) 35%, var(--pc-surface, #fff)));
 }
 .platform-tab.active::after {
   position: absolute;
@@ -376,13 +376,13 @@
   left: 17px;
   height: 2px;
   border-radius: 99px;
-  background: var(--pc-accent, #4f65f6);
+  background: var(--pc-accent, #2388e8);
   content: "";
 }
 .platform-tab-symbol { font-size: 18px; }
 :root[data-theme="dark"] .messenger-topbar {
   background:
-    radial-gradient(ellipse at 8% -55%, color-mix(in srgb, var(--pc-accent, #8291ff) 17%, transparent), transparent 48%),
+    radial-gradient(ellipse at 8% -55%, color-mix(in srgb, var(--pc-accent, #4ba5f5) 17%, transparent), transparent 48%),
     var(--pc-surface, #182333);
 }
 :root[data-theme="dark"] .topbar-user #account-label {
@@ -391,8 +391,8 @@
   background: var(--pc-surface-soft, #121d2b);
 }
 :root[data-theme="dark"] .topbar-user #account-label:hover {
-  color: var(--pc-accent, #8291ff);
-  background: var(--pc-accent-soft, #293451);
+  color: var(--pc-accent, #4ba5f5);
+  background: var(--pc-accent-soft, #1a354d);
 }
 @media (max-width: 820px) {
   .messenger-topbar {
@@ -445,7 +445,10 @@
   outline: 0;
   color: var(--pc-text);
   background: transparent;
-  font-family: inherit;\n  font-size: 13px;\n  font-weight: 500;\n  line-height: 1.4;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.4;
 }
 .chat-search input::placeholder { color: var(--pc-muted); }
 .chat-search button {
