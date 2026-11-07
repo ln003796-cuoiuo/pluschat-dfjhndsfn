@@ -287,7 +287,7 @@
           }
         });
         const openChannel = make('a', 'platform-channel-open', 'Открыть канал →');
-        openChannel.href = './channel/?slug=' + encodeURIComponent(channel.slug);
+        openChannel.href = './channel/index.php?slug=' + encodeURIComponent(channel.slug);
         openChannel.setAttribute('aria-label', 'Открыть канал ' + channel.title);
         item.append(details, openChannel, button);
         list.append(item);
