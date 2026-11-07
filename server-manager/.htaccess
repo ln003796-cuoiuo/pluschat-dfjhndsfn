@@ -1,0 +1,9 @@
+Options -Indexes
+<FilesMatch "^(config\.php|config\.example\.php)$">
+  Require all denied
+</FilesMatch>
+<IfModule mod_authz_core.c>
+  <FilesMatch "\.(bak|log|ini|sql)$">
+    Require all denied
+  </FilesMatch>
+</IfModule>
