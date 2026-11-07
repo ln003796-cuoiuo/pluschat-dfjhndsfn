@@ -1,4 +1,4 @@
-const CACHE_NAME = 'pluschat-shell-v6';
+const CACHE_NAME = 'pluschat-shell-v7';
 const SHELL_FILES = [
   './',
   './index.html',
