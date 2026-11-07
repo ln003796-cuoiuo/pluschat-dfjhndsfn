@@ -59,3 +59,12 @@ Authentication endpoints use database-backed throttling: login is limited to 10 
 The age number is optional and private. Local chats are separated into self-declared age groups. Direct and group chat creation blocks a known adult/minor mix; age is self-reported, not identity-verified. GIPHY requests use the `G` rating for under-16 and unknown-age accounts, `PG` for ages 16–17, and `PG-13` for adults. Local chat uses a user-selected city and a keyed hash of a roughly 1 km geolocation cell; raw coordinates are not stored, and device location does not prove residence. The location confirmation expires after 24 hours and must be refreshed before rejoining or continuing to read and send in a local chat.
 
 GIPHY requests run in the browser with the configured API key and show “Powered by GIPHY” in the picker. Keep the key restricted in the GIPHY dashboard. Sticker images and avatars are stored outside the public document root and served through authenticated endpoints.
+
+
+## Application architecture
+
+The application is being separated into domain modules under `modules/`. Public web pages and HTTP API adapters remain under `public/`; SQL schema and migrations remain under `database/`. The module loader is `modules/bootstrap.php` and maps the `PlusChat\\Modules\\` namespace to lowercase domain folders.
+
+Current module domains include messages, calls, feed, channels, shorts, videos, communities, users, notifications, search, media, security, moderation, reactions, analytics, settings and shared support. The first extracted vertical slice is channel-page reading and subscribed-feed querying. Existing API routes are preserved for web and Android clients.
+
+A dedicated channel page is available at `/channel/index.php?slug=<channel-slug>`. It displays channel information and posts, lets the owner publish, and lets other signed-in users subscribe. Channel media paths are not exposed by the page read API. The page uses the existing channel tables added by `database/pluschat/update_001.sql`; no new database or credentials are required.
