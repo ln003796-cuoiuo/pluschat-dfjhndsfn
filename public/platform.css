@@ -35,3 +35,13 @@
 .platform-empty{text-align:center}
 .platform-page-open .messenger-layout[hidden]{display:none}
 @media(max-width:760px){.platform-nav{padding:8px 10px;gap:4px;justify-content:space-around}.platform-tab{flex:1;gap:6px;padding:0 8px;font-size:13px}.platform-page{padding:22px 12px}.platform-feed-layout{grid-template-columns:1fr}.platform-channel-side{position:static}.platform-call-card{align-items:flex-start;flex-direction:column}.platform-call-actions{width:100%}.platform-call-actions button{flex:1}.platform-post-header{flex-direction:column;gap:7px}}
+
+/* Create menu attached to the visible plus button */
+.new-chat-control{position:relative;display:inline-flex;flex:0 0 auto}
+.new-chat-control .add-chat{display:grid;place-items:center;width:44px;height:44px;min-width:44px;border-radius:14px;font-size:27px;line-height:1}
+.new-chat-menu{position:absolute;top:calc(100% + 9px);right:0;z-index:30;display:grid;gap:4px;min-width:205px;padding:7px;border:1px solid var(--pc-line,#e5eaf1);border-radius:14px;background:var(--pc-surface,#fff);box-shadow:0 16px 38px rgba(22,38,61,.16)}
+.new-chat-menu[hidden]{display:none!important}
+.new-chat-menu button{display:flex;align-items:center;width:100%;min-height:42px;padding:0 12px;border:0;border-radius:9px;background:transparent;color:var(--pc-text,#1b2738);font:600 13px/1.3 inherit;text-align:left;cursor:pointer}
+.new-chat-menu button:hover{background:var(--pc-accent-soft,#edf6ff);color:var(--pc-accent,#2785ed)}
+.thread-call-actions .call-button{width:44px;height:44px;border-color:transparent;background:var(--pc-accent,#2785ed);color:#fff;font-size:20px}
+.thread-call-actions .call-button:hover{background:var(--pc-accent-strong,#176fc4);color:#fff}
