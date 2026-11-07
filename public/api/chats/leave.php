@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 require_once __DIR__ . '/../../../src/bootstrap.php';
+require_once __DIR__ . '/../../../modules/bootstrap.php';
 
 $userId = authenticated_user_id();
 require_post();
@@ -24,7 +25,8 @@ try {
         $pdo->rollBack();
         json_response(404, ['error' => 'conversation_not_found']);
     }
-    remove_conversation_member($pdo, $conversationId, $userId);
+    $repository = new \PlusChat\\Modules\\Messages\\Conversations\\ConversationRepository($pdo);
+    $repository->leave($conversationId, $userId);
     $pdo->commit();
     json_response(200, ['ok' => true]);
 } catch (Throwable $error) {
