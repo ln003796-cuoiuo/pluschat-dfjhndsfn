@@ -45,7 +45,7 @@ function safePath(string $relative, string $root, bool $mustExist = false): stri
     }
     $parts = explode('/', $relative);
     foreach ($parts as $part) {
-        if ($part === '' || $part === '.' || $part === '..' || str_starts_with($part, '.pluschat-manager')) {
+        if ($part === '' || $part === '.' || $part === '..' || $part === 'pluschat-manager') {
             throw new RuntimeException('Path is not allowed.');
         }
     }
@@ -134,7 +134,7 @@ try {
         if (!is_dir($dir)) throw new RuntimeException('Path is not a directory.');
         $items = [];
         foreach (new DirectoryIterator($dir) as $item) {
-            if ($item->isDot() || str_starts_with($item->getFilename(), '.pluschat-manager')) continue;
+            if ($item->isDot() || $item->getFilename() === 'pluschat-manager') continue;
             if ($item->isLink()) continue;
             $items[] = ['name'=>$item->getFilename(), 'type'=>$item->isDir()?'directory':'file', 'size'=>$item->isFile()?$item->getSize():null, 'modified'=>gmdate('c',$item->getMTime())];
         }
