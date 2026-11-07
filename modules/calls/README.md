@@ -1,0 +1,2 @@
+# Calls
+Owns room lifecycle, participant authorization and signaling metadata. PHP is the control plane; WebRTC media uses separately provisioned SFU/TURN and is never proxied through shared-hosting PHP. Current adapter: public/api/calls/token.php. Do not claim capacity or E2EE without load/security tests.

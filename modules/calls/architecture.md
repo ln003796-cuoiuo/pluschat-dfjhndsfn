@@ -1,0 +1,2 @@
+# Domain map
+Rooms, Participants, Signaling, MediaProviders, Recording and Quality. Provider credentials come from deployment configuration, never source code. Recording requires explicit participant consent and a visible indicator. Group-size targets require load testing and infrastructure budgeting.

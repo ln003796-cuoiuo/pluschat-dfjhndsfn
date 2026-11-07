@@ -1,31 +1,38 @@
 # PlusChat PHP API
 
-The API and static app are served from the same HTTPS origin so the HTTP-only session cookie works without cross-origin cookie settings. The document root must be `Server/public/`; keep `src/`, `database/`, `.env`, and `storage/` outside it.
+The API and static app are served from the same HTTPS origin so the HTTP-only session cookie works without cross-origin cookie settings. In this repository, the document root must point to the `public/` directory; keep `src/`, `database/`, `.env`, and `storage/` outside it.
 
 PlusChat is one responsive installable web app. Its service worker caches only the app shell and icon files; authenticated API responses and user media are never cached. The app needs a secure HTTPS origin (or localhost during local development) for installation and geolocation.
 
 Requires PHP 8.1+ with PDO MySQL, Fileinfo, OpenSSL, and Intl enabled. Intl is needed to normalize internationalized email domains such as `плюсчат.рф` for SMTP delivery and address comparison.
 
-For uploads, set PHP `upload_max_filesize` to at least `4M` and `post_max_size` to at least `5M`. The PHP process must be able to create and write to `Server/storage/`; keep that directory outside `public/`.
+For uploads, set PHP `upload_max_filesize` to at least `4M` and `post_max_size` to at least `5M`. The PHP process must be able to create and write to the repository-level `storage/` directory; keep that directory outside `public/`.
 
 ## Database setup
 
+The main database is `pluschat` and also stores all client accounts. Channel publishing and the subscribed-channel feed are added by `database/pluschat/update_001.sql`.
+
+Call metadata has its own database named `calls`; its initial structure is in `database/calls/update_001.sql`. It stores call rooms, participants and events only — never user accounts or passwords. See `database/README.md` for the migration naming and application order.
+
+**Important:** these SQL migrations are not run automatically. Back up the relevant database first and apply each migration once. The calls database schema is prepared separately; the existing call-token endpoint still needs its dedicated database connection and call-event persistence wired before the calls database is used by the application.
+
+
 1. Run `database/schema.sql` in the `pluschat` MySQL database.
    For an existing database created before sticker-history protection was added, also run `database/migrations/001_sticker_history_restrict.sql` once.
-2. Configure the web server environment variables from `.env.example` in the hosting control panel, or place a private `.env` in `Server/` (the loader uses hosting environment values first). Set the mail sender fields to the provided mailboxes. For SMTP, set `SMTP_HOST=mail.xn--80avljg2a1c.xn--p1ai`, `SMTP_PORT=25`, and `SMTP_ENCRYPTION=auto`. Set `SMTP_REGISTER_USER` / `SMTP_REGISTER_PASSWORD` for `register@плюсчат.рф` and `SMTP_LOGIN_USER` / `SMTP_LOGIN_PASSWORD` for `login@плюсчат.рф`. The client uses STARTTLS when the server advertises it and refuses to send SMTP AUTH credentials over an unencrypted connection. If the server does not offer STARTTLS, ask the mail provider for its supported secure SMTP port/settings rather than setting plaintext authentication. Generate a unique `APP_SECRET` for the host; keep `.env`, credentials, and API keys out of the public web root and repository.
-3. In a source checkout, run `App/deploy.ps1` from Windows to copy the static app into `public/`. The release archive already contains those public files; point the HTTPS web root at its `public/` directory.
+2. Configure the web server environment variables from `.env.example` in the hosting control panel, or place a private `.env` in the repository root (the loader uses hosting environment values first). Set the mail sender fields to the provided mailboxes. For SMTP, set `SMTP_HOST=mail.xn--80avljg2a1c.xn--p1ai`, `SMTP_PORT=25`, and `SMTP_ENCRYPTION=auto`. Set `SMTP_REGISTER_USER` / `SMTP_REGISTER_PASSWORD` for `register@плюсчат.рф` and `SMTP_LOGIN_USER` / `SMTP_LOGIN_PASSWORD` for `login@плюсчат.рф`. The client uses STARTTLS when the server advertises it and refuses to send SMTP AUTH credentials over an unencrypted connection. If the server does not offer STARTTLS, ask the mail provider for its supported secure SMTP port/settings rather than setting plaintext authentication. Generate a unique `APP_SECRET` for the host; keep `.env`, credentials, and API keys out of the public web root and repository.
+3. The static web app is already in `public/`; no separate build or copy step is required. Point the HTTPS document root at this directory.
 
-To make a clean upload archive from Windows, run `Server/package-release.ps1`. It creates `Server/release/pluschat-release-<timestamp>.zip` with the public app, PHP source, SQL schema, and setup notes. It does not include `.env`, local credentials, or runtime storage. Extract it outside the current web root, configure `.env` next to `public/`, import `database/schema.sql`, grant PHP write access to `storage/`, and set the site's document root to the extracted `public/` directory.
+To make a clean upload archive from Windows, run `./package-release.ps1` from the repository root. It creates `./release/pluschat-release-<timestamp>.zip` with the public app, PHP source, SQL schema, and setup notes. It does not include `.env`, local credentials, or runtime storage. Extract it outside the current web root, configure `.env` in the extracted repository root beside `public/`, import `database/schema.sql`, grant PHP write access to the root-level `storage/` directory, and set the site's document root to the extracted `public/` directory.
 
 The GitHub Actions workflow at `.github/workflows/package-release.yml` builds the same deployment archive when run manually or when a `v*` tag is pushed, then attaches it to the workflow run as an artifact. The workflow packages source for download; it does not deploy the website.
 
 If the hosting plan fixes the domain root at `public_html`, extract the archive in the account home directory, copy the **contents** of its `public/` folder into the domain's document root (including the hidden `.htaccess` file), and leave `src/`, `database/`, `.env`, and the generated `storage/` folder in the account home directory beside `public_html/`. Never put `.env` or `src/` inside the public web root.
 
-For a local preview, run `php -S 127.0.0.1:8080 -t public` from `Server/` after configuring the database and mail environment. HTTP localhost requires `SESSION_SECURE_COOKIE=false` in the shell environment; do not use that setting on the HTTPS production site. The secure-cookie setting defaults to `true`.
+For a local preview, run `php -S 127.0.0.1:8080 -t public` from the repository root after configuring the database and mail environment. HTTP localhost requires `SESSION_SECURE_COOKIE=false` in the shell environment; do not use that setting on the HTTPS production site. The secure-cookie setting defaults to `true`.
 
 ## Authentication endpoints
 
-- `POST /api/auth/login.php` accepts JSON `{ "email": "...", "password": "..." }`.
+- `POST /api/auth/login.php` accepts JSON `{ "identifier": "email or @username", "password": "..." }`. The legacy `email` field is still accepted for older clients.
 - `POST /api/auth/request-code.php` accepts JSON `{ "email": "..." }`.
 - `POST /api/auth/verify-code.php` accepts JSON `{ "email": "...", "code": "123456" }`.
 - `POST /api/auth/register.php` accepts multipart fields `email`, `username`, `displayName`, `bio`, `password`, and optional `avatar`.
@@ -52,3 +59,12 @@ Authentication endpoints use database-backed throttling: login is limited to 10 
 The age number is optional and private. Local chats are separated into self-declared age groups. Direct and group chat creation blocks a known adult/minor mix; age is self-reported, not identity-verified. GIPHY requests use the `G` rating for under-16 and unknown-age accounts, `PG` for ages 16–17, and `PG-13` for adults. Local chat uses a user-selected city and a keyed hash of a roughly 1 km geolocation cell; raw coordinates are not stored, and device location does not prove residence. The location confirmation expires after 24 hours and must be refreshed before rejoining or continuing to read and send in a local chat.
 
 GIPHY requests run in the browser with the configured API key and show “Powered by GIPHY” in the picker. Keep the key restricted in the GIPHY dashboard. Sticker images and avatars are stored outside the public document root and served through authenticated endpoints.
+
+
+## Application architecture
+
+The application is being separated into domain modules under `modules/`. Public web pages and HTTP API adapters remain under `public/`; SQL schema and migrations remain under `database/`. The module loader is `modules/bootstrap.php` and maps the `PlusChat\\Modules\\` namespace to lowercase domain folders.
+
+Current module domains include messages, calls, feed, channels, shorts, videos, communities, users, notifications, search, media, security, moderation, reactions, analytics, settings and shared support. The first extracted vertical slice is channel-page reading and subscribed-feed querying. Existing API routes are preserved for web and Android clients.
+
+A dedicated channel page is available at `/channel/index.php?slug=<channel-slug>`. It displays channel information and posts, lets the owner publish, and lets other signed-in users subscribe. Channel media paths are not exposed by the page read API. The page uses the existing channel tables added by `database/pluschat/update_001.sql`; no new database or credentials are required.

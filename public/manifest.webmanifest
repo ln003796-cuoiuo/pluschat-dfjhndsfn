@@ -1,15 +1,15 @@
 {
   "id": "./",
-  "name": "PlusChat",
-  "short_name": "PlusChat",
-  "description": "Личные и групповые переписки, GIF и стикеры.",
+  "name": "Плюс Чат",
+  "short_name": "Плюс Чат",
+  "description": "Мессенджер Плюс Чат: личные и групповые переписки, GIF и стикеры.",
   "lang": "ru",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "orientation": "any",
-  "background_color": "#f7f8fc",
-  "theme_color": "#f7f8fc",
+  "background_color": "#f3f6fb",
+  "theme_color": "#f3f6fb",
   "categories": ["social", "communication"],
   "icons": [
     {
