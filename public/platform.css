@@ -41,7 +41,7 @@
 .new-chat-control .add-chat{display:grid;place-items:center;width:44px;height:44px;min-width:44px;border-radius:14px;font-size:27px;line-height:1}
 .new-chat-menu{position:absolute;top:calc(100% + 9px);right:0;z-index:30;display:grid;gap:4px;min-width:205px;padding:7px;border:1px solid var(--pc-line,#e5eaf1);border-radius:14px;background:var(--pc-surface,#fff);box-shadow:0 16px 38px rgba(22,38,61,.16)}
 .new-chat-menu[hidden]{display:none!important}
-.new-chat-menu button{display:flex;align-items:center;width:100%;min-height:42px;padding:0 12px;border:0;border-radius:9px;background:transparent;color:var(--pc-text,#1b2738);font:600 13px/1.3 inherit;text-align:left;cursor:pointer}
+.new-chat-menu button{display:flex;align-items:center;width:100%;min-height:42px;padding:0 12px;border:0;border-radius:9px;background:transparent;color:var(--pc-text,#1b2738);font-family:inherit;font-size:13px;font-weight:600;line-height:1.3;text-align:left;cursor:pointer}
 .new-chat-menu button:hover{background:var(--pc-accent-soft,#edf6ff);color:var(--pc-accent,#2785ed)}
 .thread-call-actions .call-button{width:44px;height:44px;border-color:transparent;background:var(--pc-accent,#2785ed);color:#fff;font-size:20px}
 .thread-call-actions .call-button:hover{background:var(--pc-accent-strong,#176fc4);color:#fff}
@@ -445,7 +445,7 @@
   outline: 0;
   color: var(--pc-text);
   background: transparent;
-  font: 500 13px/1.4 inherit;
+  font-family: inherit;\n  font-size: 13px;\n  font-weight: 500;\n  line-height: 1.4;
 }
 .chat-search input::placeholder { color: var(--pc-muted); }
 .chat-search button {
