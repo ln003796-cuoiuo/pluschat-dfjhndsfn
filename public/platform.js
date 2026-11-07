@@ -105,12 +105,26 @@
         const video = make('button', 'submit-button', '▣ Видео');
         const begin = async (type) => {
           audio.disabled = true; video.disabled = true;
+          const popup = window.open('about:blank', '_blank');
           try {
             showTabWithoutReload('chats');
             await openConversation(Number(chat.id), chat);
-            await startCall(type);
+            const {response, data} = await api('calls/token.php', {
+              method: 'POST',
+              body: JSON.stringify({conversation_id: Number(chat.id), type})
+            });
+            if (!response.ok || !data.call_url) {
+              popup?.close();
+              statusText('#app-status', data.error === 'calls_not_configured'
+                ? 'Сервер звонков ещё не настроен.'
+                : 'Не удалось создать звонок. Проверьте подключение.');
+              return;
+            }
+            if (popup) popup.location.replace(data.call_url);
+            else window.location.assign(data.call_url);
           } catch {
-            statusText('#app-status', 'Не удалось открыть звонок. Попробуйте ещё раз.');
+            popup?.close();
+            statusText('#app-status', 'Не удалось открыть звонок. Проверьте подключение.');
           } finally {
             audio.disabled = false; video.disabled = false;
           }
