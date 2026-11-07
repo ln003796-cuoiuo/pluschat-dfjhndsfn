@@ -534,3 +534,27 @@
   .chat-item-meta { gap: 4px; }
   .chat-item-time { font-size: 9px; }
 }
+
+
+/* Plus menu actions remain grouped with chat creation */
+.new-chat-menu button[data-platform-action] {
+  position: relative;
+}
+.new-chat-menu button[data-platform-action="channel"]::before {
+  content: "▤";
+  display: inline-grid;
+  width: 23px;
+  margin-right: 8px;
+  color: var(--pc-accent);
+  font-size: 16px;
+  place-items: center;
+}
+.new-chat-menu button[data-platform-action="post"]::before {
+  content: "✎";
+  display: inline-grid;
+  width: 23px;
+  margin-right: 8px;
+  color: var(--pc-accent);
+  font-size: 16px;
+  place-items: center;
+}
