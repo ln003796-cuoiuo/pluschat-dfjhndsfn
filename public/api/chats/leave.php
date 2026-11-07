@@ -12,21 +12,11 @@ if ($conversationId < 1) json_response(422, ['error' => 'invalid_conversation'])
 try {
     $pdo = database();
     $pdo->beginTransaction();
-    $conversationQuery = $pdo->prepare('SELECT id FROM conversations WHERE id = :id FOR UPDATE');
-    $conversationQuery->execute(['id' => $conversationId]);
-    if (!$conversationQuery->fetchColumn()) {
-        $pdo->rollBack();
-        json_response(404, ['error' => 'conversation_not_found']);
-    }
-    $memberQuery = $pdo->prepare('SELECT role FROM conversation_members WHERE conversation_id = :conversation_id AND user_id = :user_id FOR UPDATE');
-    $memberQuery->execute(['conversation_id' => $conversationId, 'user_id' => $userId]);
-    $role = $memberQuery->fetchColumn();
-    if ($role === false) {
-        $pdo->rollBack();
-        json_response(404, ['error' => 'conversation_not_found']);
-    }
     $repository = new \PlusChat\Modules\Messages\Conversations\ConversationRepository($pdo);
-    $repository->leave($conversationId, $userId);
+    if (!$repository->leave($conversationId, $userId)) {
+        $pdo->rollBack();
+        json_response(404, ['error' => 'conversation_not_found']);
+    }
     $pdo->commit();
     json_response(200, ['ok' => true]);
 } catch (Throwable $error) {
