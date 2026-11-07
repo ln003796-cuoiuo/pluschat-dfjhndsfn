@@ -13,6 +13,7 @@
     ['chats', 'Чаты', 'message-circle'],
     ['calls', 'Звонки', 'phone'],
     ['feed', 'Лента', 'newspaper'],
+    ['profile', 'Профиль', 'user-round'],
   ];
   const buttons = new Map();
   for (const [id, label, symbol] of tabDefinitions) {
@@ -23,7 +24,13 @@
     button.innerHTML = '<span class="platform-tab-symbol" aria-hidden="true"></span><span></span>';
     button.querySelector('.platform-tab-symbol').textContent = ({chats:'◉',calls:'☎',feed:'▤'})[id] || symbol;
     button.querySelector('span:last-child').textContent = label;
-    button.addEventListener('click', () => showTab(id));
+    button.addEventListener('click', () => {
+      if (id === 'profile') {
+        document.querySelector('#account-label')?.click();
+        return;
+      }
+      showTab(id);
+    });
     nav.append(button);
     buttons.set(id, button);
   }
