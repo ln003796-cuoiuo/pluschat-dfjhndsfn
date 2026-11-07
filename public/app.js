@@ -600,7 +600,30 @@ async function loadChats() {
       preview.textContent = chat.last_message || (chat.last_message_type === 'sticker' ? 'Стикер' : chat.last_message_type === 'gif' ? 'GIF' : 'Пока нет сообщений');
       copy.append(title, preview);
       button.append(avatar, copy);
+      const meta = document.createElement('span');
+      meta.className = 'chat-item-meta';
+      if (chat.last_message_at) {
+        const timestamp = new Date(String(chat.last_message_at).replace(' ', 'T'));
+        if (!Number.isNaN(timestamp.getTime())) {
+          const time = document.createElement('time');
+          time.className = 'chat-item-time';
+          time.dateTime = timestamp.toISOString();
+          const now = new Date();
+          const sameDay = timestamp.getFullYear() === now.getFullYear()
+            && timestamp.getMonth() === now.getMonth()
+            && timestamp.getDate() === now.getDate();
+          time.textContent = sameDay
+            ? timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+            : timestamp.toLocaleDateString([], { day: '2-digit', month: '2-digit' });
+          time.title = timestamp.toLocaleString();
+          meta.append(time);
+        }
+      }
       const unreadCount = Number(chat.unread_count) || 0;
+      if (unreadCount > 0) {
+        button.classList.add('has-unread');
+      }
+      if (meta.childNodes.length) button.append(meta);
       if (unreadCount > 0) {
         const unread = document.createElement('span');
         unread.className = 'chat-unread-badge';
