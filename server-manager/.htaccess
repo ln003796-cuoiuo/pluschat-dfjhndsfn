@@ -1,0 +1,9 @@
+Options -Indexes
+RewriteEngine On
+RewriteCond %{HTTPS} !=on
+RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
+
+# The MCP endpoint is the only publicly reachable file in this directory.
+<FilesMatch "^(?!mcp\.php$).*$">
+  Require all denied
+</FilesMatch>
