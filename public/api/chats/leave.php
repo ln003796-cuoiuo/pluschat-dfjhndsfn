@@ -25,7 +25,7 @@ try {
         $pdo->rollBack();
         json_response(404, ['error' => 'conversation_not_found']);
     }
-    $repository = new \PlusChat\\Modules\\Messages\\Conversations\\ConversationRepository($pdo);
+    $repository = new \PlusChat\Modules\Messages\Conversations\ConversationRepository($pdo);
     $repository->leave($conversationId, $userId);
     $pdo->commit();
     json_response(200, ['ok' => true]);
