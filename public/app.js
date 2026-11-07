@@ -649,8 +649,10 @@ async function startCall(conversationId = currentConversationId) {
     if (!response.ok || !data.call_url) {
       popup.close();
       showAppStatus(data.error === 'calls_not_configured'
-        ? 'Сервер звонков ещё не настроен.'
-        : data.error === 'conversation_not_found'
+        ? 'Адрес сервера звонков не указан в настройках хостинга.'
+        : data.error === 'calls_url_invalid'
+          ? 'В настройках указан неверный адрес сервера звонков. Нужен HTTPS-адрес.'
+          : data.error === 'conversation_not_found'
           ? 'Вы не состоите в этом чате.'
           : 'Не удалось создать звонок. Проверьте подключение и попробуйте ещё раз.');
       return;
