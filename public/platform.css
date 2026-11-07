@@ -1,0 +1,37 @@
+.platform-nav{display:flex;gap:8px;padding:10px 22px;background:var(--surface,#fff);border-bottom:1px solid var(--line,#e7ebf2);position:relative;z-index:2}
+.platform-tab{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:42px;padding:0 18px;border:0;border-radius:13px;background:transparent;color:var(--muted,#6d7788);font:600 14px/1 inherit;cursor:pointer;transition:background .18s,color .18s}
+.platform-tab:hover{background:var(--surface-soft,#f2f5fa);color:var(--text,#182235)}
+.platform-tab.active{background:rgba(39,133,237,.11);color:var(--accent,#2785ed)}
+.platform-tab-symbol{font-size:18px;line-height:1}
+.platform-page{min-height:calc(100vh - 145px);padding:28px clamp(16px,4vw,52px);background:var(--page,#f3f6fb);overflow:auto}
+.platform-page[hidden]{display:none}
+.platform-page-heading{max-width:1180px;margin:0 auto 24px}
+.platform-page-heading h2{margin:3px 0 7px;font-size:clamp(25px,3vw,34px);letter-spacing:-.04em;color:var(--text,#182235)}
+.platform-page-heading p:last-child{margin:0;color:var(--muted,#6d7788)}
+.platform-call-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:14px;max-width:1180px;margin:auto}
+.platform-call-card,.platform-post-card,.platform-channel-item,.platform-composer,.platform-channel-form{background:var(--surface,#fff);border:1px solid var(--line,#e7ebf2);border-radius:18px;box-shadow:0 8px 28px rgba(25,45,75,.045)}
+.platform-call-card{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:17px}
+.platform-call-info,.platform-channel-details,.platform-post-author{display:flex;flex-direction:column;gap:5px;min-width:0}
+.platform-call-info strong,.platform-channel-details strong,.platform-post-author strong{color:var(--text,#182235);font-size:15px}
+.platform-call-info span,.platform-channel-details span,.platform-channel-details small,.platform-post-author span{color:var(--muted,#6d7788);font-size:12px;overflow-wrap:anywhere}
+.platform-call-actions{display:flex;gap:8px;flex-shrink:0}
+.platform-call-actions button{min-height:38px;padding:0 12px;font-size:12px}
+.platform-feed-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(270px,340px);gap:22px;max-width:1180px;margin:auto;align-items:start}
+.platform-feed-main,.platform-posts,.platform-channels{display:flex;flex-direction:column;gap:14px;min-width:0}
+.platform-composer,.platform-channel-form{display:flex;flex-direction:column;gap:11px;padding:18px;margin-bottom:16px}
+.platform-composer label,.platform-channel-form strong{font-size:14px;font-weight:700;color:var(--text,#182235)}
+.platform-composer textarea,.platform-channel-form textarea,.platform-channel-form input,.platform-composer select{width:100%;border:1px solid var(--line,#dce2ec);border-radius:12px;background:var(--surface,#fff);color:var(--text,#182235);padding:11px 13px;font:inherit;resize:vertical}
+.platform-composer .submit-button{align-self:flex-end;min-width:160px}
+.platform-post-card{padding:19px}
+.platform-post-header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.platform-post-date{font-size:11px;color:var(--muted,#6d7788);white-space:nowrap}
+.platform-post-body{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.65;color:var(--text,#263348);margin:16px 0 0}
+.platform-channel-side{position:sticky;top:12px}
+.platform-side-heading h3{margin:0 0 12px;color:var(--text,#182235)}
+.platform-channel-item{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px}
+.platform-channel-details small{line-height:1.45}
+.platform-channel-item .channel-subscribe{flex-shrink:0;min-height:36px;padding:0 11px;font-size:12px}
+.platform-muted,.platform-empty{padding:24px;border:1px dashed var(--line,#d9e0ea);border-radius:16px;color:var(--muted,#6d7788);background:var(--surface,#fff);line-height:1.55}
+.platform-empty{text-align:center}
+.platform-page-open .messenger-layout[hidden]{display:none}
+@media(max-width:760px){.platform-nav{padding:8px 10px;gap:4px;justify-content:space-around}.platform-tab{flex:1;gap:6px;padding:0 8px;font-size:13px}.platform-page{padding:22px 12px}.platform-feed-layout{grid-template-columns:1fr}.platform-channel-side{position:static}.platform-call-card{align-items:flex-start;flex-direction:column}.platform-call-actions{width:100%}.platform-call-actions button{flex:1}.platform-post-header{flex-direction:column;gap:7px}}
