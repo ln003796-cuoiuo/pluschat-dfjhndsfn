@@ -562,3 +562,7 @@
 .platform-channel-open{display:inline-flex;align-items:center;justify-content:center;white-space:nowrap;color:var(--pc-accent);font-size:11px;font-weight:750;text-decoration:none;padding:8px 10px;border:1px solid var(--pc-border);border-radius:10px;background:var(--pc-surface)}
 .platform-channel-open:hover{background:var(--pc-accent-soft)}
 @media(max-width:520px){.platform-channel-open{padding:7px 8px;font-size:10px}}
+
+.platform-channel-details{flex:1 1 auto}
+.platform-post-channel-link{color:var(--pc-text);font-size:14px;font-weight:800;text-decoration:none}
+.platform-post-channel-link:hover{color:var(--pc-accent)}
