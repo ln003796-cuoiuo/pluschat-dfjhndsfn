@@ -231,7 +231,9 @@
         const card = make('article', 'platform-post-card');
         const header = make('div', 'platform-post-header');
         const author = make('div', 'platform-post-author');
-        author.append(make('strong', '', post.channel_title || 'Канал'));
+        const channelLink = make('a', 'platform-post-channel-link', post.channel_title || 'Канал');
+        channelLink.href = './channel/index.php?slug=' + encodeURIComponent(post.channel_slug || '');
+        author.append(channelLink);
         author.append(make('span', '', '@' + (post.channel_slug || 'channel') + ' · ' + (post.author_name || post.author_username || 'Автор')));
         header.append(author);
         const date = make('time', 'platform-post-date', post.created_at || '');
