@@ -108,14 +108,14 @@ try {
         $body = trim((string) ($data['body'] ?? ''));
         if ($body === '' || utf8_length($body) > 5000) json_response(422, ['error' => 'invalid_message']);
         $enforceSendLimit();
-        $repository = new \PlusChat\\Modules\\Messages\\MessageRecords\\MessageRepository($pdo);
+        $repository = new \PlusChat\Modules\Messages\MessageRecords\MessageRepository($pdo);
         $createdMessageId = $repository->createText($conversationId, $userId, $body);
     } elseif ($type === 'gif') {
         $url = trim((string) ($data['url'] ?? ''));
         $host = parse_url($url, PHP_URL_HOST);
         if (strlen($url) > 1024 || parse_url($url, PHP_URL_SCHEME) !== 'https' || !$host || !preg_match('/(^|\.)giphy\.com$/i', $host)) json_response(422, ['error' => 'invalid_gif']);
         $enforceSendLimit();
-        $repository = new \PlusChat\\Modules\\Messages\\MessageRecords\\MessageRepository($pdo);
+        $repository = new \PlusChat\Modules\Messages\MessageRecords\MessageRepository($pdo);
         $createdMessageId = $repository->createGif($conversationId, $userId, $url);
     } elseif ($type === 'sticker') {
         $stickerId = (int) ($data['stickerId'] ?? 0);
@@ -131,7 +131,7 @@ try {
             json_response(404, ['error' => 'sticker_not_found']);
         }
         $enforceSendLimit();
-        $repository = new \PlusChat\\Modules\\Messages\\MessageRecords\\MessageRepository($pdo);
+        $repository = new \PlusChat\Modules\Messages\MessageRecords\MessageRepository($pdo);
         $createdMessageId = $repository->createSticker($conversationId, $userId, $stickerId);
         if ($stickerTransactionStarted) $pdo->commit();
     } else {
