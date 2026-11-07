@@ -101,37 +101,20 @@
         info.append(make('strong', '', chat.title || chat.peer_name || 'Чат'));
         info.append(make('span', '', chat.kind === 'group' ? 'Групповой чат' : (chat.peer_username ? '@' + chat.peer_username : 'Личный чат')));
         const actions = make('div', 'platform-call-actions');
-        const audio = make('button', 'outline-button', '☎ Аудио');
-        const video = make('button', 'submit-button', '▣ Видео');
-        const begin = async (type) => {
-          audio.disabled = true; video.disabled = true;
-          const popup = window.open('about:blank', '_blank');
+        const call = make('button', 'submit-button', '☎ Позвонить');
+        call.type = 'button';
+        call.title = 'Начать единый аудио-видеозвонок';
+        call.addEventListener('click', async () => {
+          call.disabled = true;
           try {
-            showTabWithoutReload('chats');
-            await openConversation(Number(chat.id), chat);
-            const {response, data} = await api('calls/token.php', {
-              method: 'POST',
-              body: JSON.stringify({conversation_id: Number(chat.id), type})
-            });
-            if (!response.ok || !data.call_url) {
-              popup?.close();
-              statusText('#app-status', data.error === 'calls_not_configured'
-                ? 'Сервер звонков ещё не настроен.'
-                : 'Не удалось создать звонок. Проверьте подключение.');
-              return;
-            }
-            if (popup) popup.location.replace(data.call_url);
-            else window.location.assign(data.call_url);
-          } catch {
-            popup?.close();
-            statusText('#app-status', 'Не удалось открыть звонок. Проверьте подключение.');
+            // startCall opens the call tab synchronously from this click and requests a
+            // video-capable room; microphone audio is available in the same call.
+            await window.startCall(Number(chat.id));
           } finally {
-            audio.disabled = false; video.disabled = false;
+            call.disabled = false;
           }
-        };
-        audio.addEventListener('click', () => begin('audio'));
-        video.addEventListener('click', () => begin('video'));
-        actions.append(audio, video);
+        });
+        actions.append(call);
         card.append(info, actions);
         list.append(card);
       }
