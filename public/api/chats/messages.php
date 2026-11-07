@@ -82,7 +82,7 @@ try {
     if ($method === 'GET') {
         $afterId = max(0, (int) ($_GET['after_id'] ?? 0));
         $beforeId = max(0, (int) ($_GET['before_id'] ?? 0));
-        $repository = new \PlusChat\\Modules\\Messages\\MessageRecords\\MessageRepository($pdo);
+        $repository = new \PlusChat\Modules\Messages\MessageRecords\MessageRepository($pdo);
         $messages = $repository->history($conversationId, $afterId, $beforeId, 100);
         if ($messages) {
             $latestMessageId = (int) $messages[count($messages) - 1]['id'];
