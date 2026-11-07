@@ -36,6 +36,36 @@
   }
   topbar.insertAdjacentElement('afterend', nav);
 
+  // Extend the existing plus menu with channel publishing shortcuts.
+  const createMenu = root.querySelector('#new-chat-menu');
+  if (createMenu) {
+    const channelAction = document.createElement('button');
+    channelAction.type = 'button';
+    channelAction.dataset.platformAction = 'channel';
+    channelAction.textContent = 'Создать канал';
+    channelAction.addEventListener('click', () => {
+      showTab('feed');
+      window.setTimeout(() => document.querySelector('#platform-channel-title')?.focus(), 0);
+      createMenu.hidden = true;
+      root.querySelector('#new-chat')?.setAttribute('aria-expanded', 'false');
+    });
+    const postAction = document.createElement('button');
+    postAction.type = 'button';
+    postAction.dataset.platformAction = 'post';
+    postAction.textContent = 'Новая публикация';
+    postAction.addEventListener('click', () => {
+      showTab('feed');
+      window.setTimeout(() => {
+        const channel = document.querySelector('#platform-post-channel');
+        if (channel && channel.options.length > 1) channel.focus();
+        else document.querySelector('#platform-channel-title')?.focus();
+      }, 0);
+      createMenu.hidden = true;
+      root.querySelector('#new-chat')?.setAttribute('aria-expanded', 'false');
+    });
+    createMenu.append(channelAction, postAction);
+  }
+
   // Fast client-side chat search: filters the already loaded conversation list.
   const sidebar = root.querySelector('.chat-sidebar');
   const sidebarHeading = sidebar?.querySelector('.sidebar-heading');
