@@ -10,6 +10,13 @@ For uploads, set PHP `upload_max_filesize` to at least `4M` and `post_max_size` 
 
 ## Database setup
 
+The main database is `pluschat` and also stores all client accounts. Channel publishing and the subscribed-channel feed are added by `database/pluschat/update_001.sql`.
+
+Call metadata has its own database named `calls`; its initial structure is in `database/calls/update_001.sql`. It stores call rooms, participants and events only — never user accounts or passwords. See `database/README.md` for the migration naming and application order.
+
+**Important:** these SQL migrations are not run automatically. Back up the relevant database first and apply each migration once. The calls database schema is prepared separately; the existing call-token endpoint still needs its dedicated database connection and call-event persistence wired before the calls database is used by the application.
+
+
 1. Run `database/schema.sql` in the `pluschat` MySQL database.
    For an existing database created before sticker-history protection was added, also run `database/migrations/001_sticker_history_restrict.sql` once.
 2. Configure the web server environment variables from `.env.example` in the hosting control panel, or place a private `.env` in the repository root (the loader uses hosting environment values first). Set the mail sender fields to the provided mailboxes. For SMTP, set `SMTP_HOST=mail.xn--80avljg2a1c.xn--p1ai`, `SMTP_PORT=25`, and `SMTP_ENCRYPTION=auto`. Set `SMTP_REGISTER_USER` / `SMTP_REGISTER_PASSWORD` for `register@плюсчат.рф` and `SMTP_LOGIN_USER` / `SMTP_LOGIN_PASSWORD` for `login@плюсчат.рф`. The client uses STARTTLS when the server advertises it and refuses to send SMTP AUTH credentials over an unencrypted connection. If the server does not offer STARTTLS, ask the mail provider for its supported secure SMTP port/settings rather than setting plaintext authentication. Generate a unique `APP_SECRET` for the host; keep `.env`, credentials, and API keys out of the public web root and repository.
