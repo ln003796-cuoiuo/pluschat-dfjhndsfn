@@ -39,6 +39,8 @@ try {
         'room' => 'conversation-' . (string) $conversationId,
         'conversation_id' => (int) $conversationId,
         'type' => $type,
+        'media_mode' => 'audio_video',
+        'media_mode' => 'audio_video',
         'role' => (string) $conversation['role'],
         'jti' => sprintf('%s-%s', bin2hex(random_bytes(8)), bin2hex(random_bytes(8))),
         'iat' => $now,
@@ -48,12 +50,20 @@ try {
     $unsigned = $encode($header) . '.' . $encode($claims);
     $signature = hash_hmac('sha256', $unsigned, $secret, true);
     $token = $unsigned . '.' . rtrim(strtr(base64_encode($signature), '+/', '-_'), '=');
-    $baseUrl = rtrim((string) env_value('CALLS_BASE_URL', 'https://xn--b1ajehof.xn--80avljg2a1c.xn--p1ai'), '/');
+    $configuredCallsUrl = trim((string) env_value('CALLS_BASE_URL', ''));
+    if ($configuredCallsUrl === '') {
+        json_response(503, ['error' => 'calls_not_configured']);
+    }
+    $callsUrlParts = parse_url($configuredCallsUrl);
+    $callsHost = strtolower((string) ($callsUrlParts['host'] ?? ''));
+    $callsScheme = strtolower((string) ($callsUrlParts['scheme'] ?? ''));
+    if (!$callsUrlParts || $callsHost === '' || ($callsScheme !== 'https' && !in_array($callsHost, ['localhost', '127.0.0.1'], true))) {
+        json_response(503, ['error' => 'calls_url_invalid']);
+    }
+    $baseUrl = rtrim($configuredCallsUrl, '/');
 
     // Publish a normal chat notice without exposing the one-time join token.
-    $notice = $type === 'video'
-        ? '📹 Видеозвонок начат. Нажмите кнопку звонка в заголовке чата, чтобы присоединиться.'
-        : '📞 Аудиозвонок начат. Нажмите кнопку звонка в заголовке чата, чтобы присоединиться.';
+    $notice = '📞 Аудио- и видеозвонок начат. Откройте вкладку «Звонки», чтобы присоединиться.';
     $message = $pdo->prepare("INSERT INTO messages (conversation_id, sender_id, message_type, body) VALUES (:conversation_id, :sender_id, 'text', :body)");
     $message->execute(['conversation_id' => $conversationId, 'sender_id' => $userId, 'body' => $notice]);
 

@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 require_once __DIR__ . '/../../../src/bootstrap.php';
+require_once __DIR__ . '/../../../modules/bootstrap.php';
 
 $userId = authenticated_user_id();
 require_post();
@@ -11,20 +12,11 @@ if ($conversationId < 1) json_response(422, ['error' => 'invalid_conversation'])
 try {
     $pdo = database();
     $pdo->beginTransaction();
-    $conversationQuery = $pdo->prepare('SELECT id FROM conversations WHERE id = :id FOR UPDATE');
-    $conversationQuery->execute(['id' => $conversationId]);
-    if (!$conversationQuery->fetchColumn()) {
+    $repository = new \PlusChat\Modules\Messages\Conversations\ConversationRepository($pdo);
+    if (!$repository->leave($conversationId, $userId)) {
         $pdo->rollBack();
         json_response(404, ['error' => 'conversation_not_found']);
     }
-    $memberQuery = $pdo->prepare('SELECT role FROM conversation_members WHERE conversation_id = :conversation_id AND user_id = :user_id FOR UPDATE');
-    $memberQuery->execute(['conversation_id' => $conversationId, 'user_id' => $userId]);
-    $role = $memberQuery->fetchColumn();
-    if ($role === false) {
-        $pdo->rollBack();
-        json_response(404, ['error' => 'conversation_not_found']);
-    }
-    remove_conversation_member($pdo, $conversationId, $userId);
     $pdo->commit();
     json_response(200, ['ok' => true]);
 } catch (Throwable $error) {

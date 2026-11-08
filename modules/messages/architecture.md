@@ -1,0 +1,2 @@
+# Domain map
+Conversations/ membership and chat metadata; Messages/ lifecycle and content; Delivery/ read cursors; Attachments/ safe file references; Composition/ drafts, edits, replies, forwards; Policies/ access and retention. Never treat hidden client controls as authorization.

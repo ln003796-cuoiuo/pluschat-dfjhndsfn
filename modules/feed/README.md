@@ -1,0 +1,2 @@
+# Feed
+Personalized stream of subscribed-channel publications. Consumes canonical channel_posts; never copies media. Ranking, pagination, muted channels and recommendations belong here. Existing adapter: public/api/channels/feed.php.
